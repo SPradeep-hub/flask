@@ -1,0 +1,211 @@
+/* ================= GLOBAL ================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+body {
+    background-color: #0a0a0f;
+    color: white;
+}
+
+/* ================= COLORS ================= */
+.text-primary {
+    color: #00e9fa;
+}
+
+.bg-primary {
+    background-color: #00e9fa;
+}
+
+.border-primary {
+    border-color: #00e9fa;
+}
+
+/* ================= GLASS EFFECT ================= */
+.glass-panel {
+    background: rgba(20, 25, 35, 0.7);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(0, 233, 250, 0.15);
+}
+
+/* ================= BACKGROUND ================= */
+.neural-bg {
+    background-image: 
+        linear-gradient(rgba(0,233,250,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,233,250,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+/* ================= ANIMATIONS ================= */
+@keyframes float-bg {
+    0% { transform: translateY(0px) translateX(0px); }
+    50% { transform: translateY(-20px) translateX(10px); }
+    100% { transform: translateY(0px) translateX(0px); }
+}
+
+.animate-float-bg {
+    animation: float-bg 18s infinite ease-in-out;
+}
+
+@keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(0,233,250,0.2); }
+    50% { box-shadow: 0 0 60px rgba(0,233,250,0.6); }
+}
+
+.glow-pulse {
+    animation: glow-pulse 3s infinite;
+}
+
+/* ================= HOVER EFFECTS ================= */
+.hover-glow:hover {
+    box-shadow: 0 0 25px rgba(0,233,250,0.5);
+    transition: all 0.3s ease;
+}
+
+/* ================= BUTTON ================= */
+.btn-primary {
+    background-color: #00e9fa;
+    color: black;
+    font-weight: bold;
+    border-radius: 12px;
+    padding: 12px 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 20px rgba(0,233,250,0.5);
+}
+
+/* ================= INPUT FIELDS ================= */
+.input-field {
+    width: 100%;
+    background: transparent;
+    outline: none;
+    color: white;
+    font-size: 14px;
+}
+
+.input-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(0,233,250,0.2);
+    border-radius: 10px;
+    padding: 10px 15px;
+    transition: 0.3s;
+}
+
+.input-container:focus-within {
+    border-color: #00e9fa;
+}
+
+/* ================= TABS ================= */
+.tab-active {
+    background: rgba(0, 233, 250, 0.15);
+    color: #00e9fa;
+    border-color: #00e9fa;
+    font-weight: 600;
+}
+
+/* ================= CARD ================= */
+.card {
+    border-radius: 20px;
+    padding: 20px;
+    background: rgba(20, 25, 35, 0.6);
+    border: 1px solid rgba(0,233,250,0.15);
+    backdrop-filter: blur(10px);
+}
+
+/* ================= TEXT ================= */
+.text-muted {
+    color: #94a3b8;
+}
+
+.text-small {
+    font-size: 12px;
+}
+
+/* ================= FLEX HELPERS ================= */
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ================= SPACING ================= */
+.mt-2 { margin-top: 8px; }
+.mt-4 { margin-top: 16px; }
+.mt-8 { margin-top: 32px; }
+
+.p-2 { padding: 8px; }
+.p-4 { padding: 16px; }
+.p-8 { padding: 32px; }
+
+/* ================= ROUNDED ================= */
+.rounded-xl {
+    border-radius: 12px;
+}
+
+.rounded-2xl {
+    border-radius: 20px;
+}
+
+.rounded-3xl {
+    border-radius: 30px;
+}
+/* Glass effect */
+.glass-morphism {
+    background: rgba(20, 25, 35, 0.6);
+    backdrop-filter: blur(16px);
+}
+
+/* Animations */
+@keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.animate-slideDown {
+    animation: slideDown 0.6s ease;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeInUp {
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+/* Scan line */
+.scan-line {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: #00e9fa;
+    top: 0;
+    animation: scan 3s linear infinite;
+}
+@keyframes scan {
+    0% { top: 0; }
+    100% { top: 100%; }
+}
+
+/* Marquee */
+@keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+    animation: marquee 20s linear infinite;
+}
