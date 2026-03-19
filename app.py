@@ -18,6 +18,21 @@ def home():
 def login():
     return render_template("login.html")
 
+#profile page
+@app.route("/profile")
+def profile():
+    return render_template("profile.html")
+
+#report page
+@app.route("/report")
+def report():
+    return render_template("report.html")
+
+#upload page
+@app.route("/upload")
+def upload():
+    return render_template("upload.html")
+
 # Auth page (if needed)
 @app.route("/auth")
 def auth():
@@ -28,8 +43,7 @@ def auth():
 def how():
     return render_template("howitworks.html")
 
-
-
+#index page
 @app.route("/index")
 def index():
     return render_template("index.html")
