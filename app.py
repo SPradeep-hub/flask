@@ -19,10 +19,6 @@ def home():
 def login():
     return render_template("login.html")
 
-@app.route("/login")
-def login():
-    return render_template("login.html")
-
 # Auth page (if needed)
 @app.route("/auth")
 def auth():
