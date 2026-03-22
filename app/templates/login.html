@@ -235,7 +235,7 @@
                 return;
             }
             // redirect to the scanning page (we'll open in same window)
-            window.location.href = 'scanning.html'; // assuming scanning page exists, but for demo we can show alert + fake redirect
+            window.location.href = 'scanning'; // assuming scanning page exists, but for demo we can show alert + fake redirect
             // if you want to simulate, we can show message and replace content (but we'll redirect to a placeholder)
             // For this demo, we'll use a fallback: since scanning page might not exist, we show alert and then simulate.
             alert('login successful! redirecting to neural scan hub... (demo)');
@@ -271,7 +271,7 @@
         window.handleSignup = handleSignup;
 
         function goToUpload() {
-            window.location.href = "upload.html";
+            window.location.href = "upload";
         }
 
     </script>

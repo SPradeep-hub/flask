@@ -484,7 +484,7 @@
                             scanBtn.innerHTML = `✅ AUTHENTIC 98.3%`;
 
                             setTimeout(() => {
-                                window.location.href = "auth.html";
+                                window.location.href = "auth";
                             }, 1000); // redirect after 1 second
                         }
                     }, 600);
@@ -530,6 +530,43 @@
             document.getElementById('fileInputVideo').addEventListener('change', () => document.getElementById('scanVideoBtn').innerText = 'RUN FORENSICS');
             document.getElementById('fileInputAudio').addEventListener('change', () => document.getElementById('scanAudioBtn').innerText = 'RUN FORENSICS');
         })();
+        document.getElementById('scanVideoBtn').addEventListener('click', function() {
+    const fileInput = document.getElementById('fileInputVideo');
+    const file = fileInput.files[0];
+    if (!file) {
+        alert('Please select a video.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const scanBtn = this;
+    scanBtn.disabled = true;
+    scanBtn.innerHTML = `<span class="material-symbols-outlined animate-spin">radar</span> Processing...`;
+
+    fetch('/upload_video', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            scanBtn.innerHTML = `✅ ${data.message}`;
+            setTimeout(() => {
+                window.location.href = "auth";
+            }, 1500);
+        } else {
+            scanBtn.innerHTML = `❌ Error: ${data.error}`;
+            scanBtn.disabled = false;
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        scanBtn.innerHTML = `❌ Upload failed`;
+        scanBtn.disabled = false;
+    });
+});
     </script>
 
     <!-- ========== FOOTER (minimal) ========== -->
