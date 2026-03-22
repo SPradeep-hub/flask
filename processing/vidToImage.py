@@ -1,6 +1,9 @@
-def process_video(video_path, output_folder):
-    import cv2, os, math
+import cv2
+import os
+import math
 
+
+def process_video(video_path, output_folder):
     os.makedirs(output_folder, exist_ok=True)
 
     cap = cv2.VideoCapture(video_path)
