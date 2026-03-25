@@ -1,69 +1,145 @@
+import os
+import tempfile
+import zipfile
+from pathlib import Path
+
 import cv2
 from mtcnn import MTCNN
-import sys, os.path
-import json
-from keras import backend as K
+from flask import Flask, request, render_template_string, send_file
+
+# Suppress TensorFlow logging and configure GPU memory growth (optional)
 import tensorflow as tf
-print(tf.__version__)
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
-
 physical_devices = tf.config.list_physical_devices('GPU')
-print(physical_devices)
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
+if physical_devices:
+    try:
+        tf.config.experimental.set_memory_growth(physical_devices[0], True)
+    except:
+        pass
 
-base_path = '.\\train_sample_videos\\'
+# Initialize MTCNN detector once (reused across requests)
+# Note: In a production multi-threaded environment, consider using a lock
+# or process per request if thread safety becomes an issue.
+detector = MTCNN()
+
+app = Flask(__name__)
+
+# Simple HTML upload form
+UPLOAD_FORM = '''
+<!doctype html>
+<title>Upload Video</title>
+<h1>Upload a video file to extract faces</h1>
+<form method=post enctype=multipart/form-data>
+  <input type=file name=video accept="video/*">
+  <input type=submit value=Upload>
+</form>
+'''
 
 def get_filename_only(file_path):
-    file_basename = os.path.basename(file_path)
-    filename_only = file_basename.split('.')[0]
-    return filename_only
+    """Return filename without extension."""
+    return Path(file_path).stem
 
-with open(os.path.join(base_path, 'metadata.json')) as metadata_json:
-    metadata = json.load(metadata_json)
-    print(len(metadata))
+def extract_frames(video_path, output_dir, sample_rate=1):
+    """
+    Extract frames from video and save as images in output_dir.
+    Returns list of frame file paths.
+    """
+    cap = cv2.VideoCapture(video_path)
+    frame_count = 0
+    saved_frames = []
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        if frame_count % sample_rate == 0:
+            frame_filename = os.path.join(output_dir, f"frame_{frame_count:06d}.jpg")
+            cv2.imwrite(frame_filename, frame)
+            saved_frames.append(frame_filename)
+        frame_count += 1
+    cap.release()
+    return saved_frames
 
-for filename in metadata.keys():
-    tmp_path = os.path.join(base_path, get_filename_only(filename))
-    print('Processing Directory: ' + tmp_path)
-    frame_images = [x for x in os.listdir(tmp_path) if os.path.isfile(os.path.join(tmp_path, x))]
-    faces_path = os.path.join(tmp_path, 'faces')
-    print('Creating Directory: ' + faces_path)
-    os.makedirs(faces_path, exist_ok=True)
-    print('Cropping Faces from Images...')
-
-    for frame in frame_images:
-        print('Processing ', frame)
-        detector = MTCNN()
-        image = cv2.cvtColor(cv2.imread(os.path.join(tmp_path, frame)), cv2.COLOR_BGR2RGB)
-        results = detector.detect_faces(image)
-        print('Face Detected: ', len(results))
-        count = 0
+def crop_faces_from_frames(frame_paths, faces_dir, margin_ratio=0.3, min_confidence=0.95):
+    """
+    Detect and crop faces from each frame, save them in faces_dir.
+    Uses the global detector.
+    Returns list of saved face file paths.
+    """
+    face_paths = []
+    for frame_path in frame_paths:
+        # Read image and convert to RGB (MTCNN expects RGB)
+        image_bgr = cv2.imread(frame_path)
+        if image_bgr is None:
+            continue
+        image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
+        results = detector.detect_faces(image_rgb)
         
-        for result in results:
-            bounding_box = result['box']
-            print(bounding_box)
-            confidence = result['confidence']
-            print(confidence)
-            if len(results) < 2 or confidence > 0.95:
-                margin_x = bounding_box[2] * 0.3  # 30% as the margin
-                margin_y = bounding_box[3] * 0.3  # 30% as the margin
-                x1 = int(bounding_box[0] - margin_x)
-                if x1 < 0:
-                    x1 = 0
-                x2 = int(bounding_box[0] + bounding_box[2] + margin_x)
-                if x2 > image.shape[1]:
-                    x2 = image.shape[1]
-                y1 = int(bounding_box[1] - margin_y)
-                if y1 < 0:
-                    y1 = 0
-                y2 = int(bounding_box[1] + bounding_box[3] + margin_y)
-                if y2 > image.shape[0]:
-                    y2 = image.shape[0]
-                print(x1, y1, x2, y2)
-                crop_image = image[y1:y2, x1:x2]
-                new_filename = '{}-{:02d}.png'.format(os.path.join(faces_path, get_filename_only(frame)), count)
-                count = count + 1
-                cv2.imwrite(new_filename, cv2.cvtColor(crop_image, cv2.COLOR_RGB2BGR))
-            else:
-                print('Skipped a face..')
-    
+        for i, result in enumerate(results):
+            conf = result['confidence']
+            # Skip low confidence faces if multiple faces are present
+            if len(results) >= 2 and conf < min_confidence:
+                print(f"Skipped low confidence face ({conf}) in {frame_path}")
+                continue
+
+            x, y, w, h = result['box']
+            # Add margin
+            margin_x = int(w * margin_ratio)
+            margin_y = int(h * margin_ratio)
+            x1 = max(0, x - margin_x)
+            y1 = max(0, y - margin_y)
+            x2 = min(image_rgb.shape[1], x + w + margin_x)
+            y2 = min(image_rgb.shape[0], y + h + margin_y)
+
+            crop = image_rgb[y1:y2, x1:x2]
+            # Generate output filename
+            base = get_filename_only(frame_path)
+            face_filename = os.path.join(faces_dir, f"{base}_face{i:02d}.png")
+            cv2.imwrite(face_filename, cv2.cvtColor(crop, cv2.COLOR_RGB2BGR))
+            face_paths.append(face_filename)
+
+    return face_paths
+
+@app.route('/', methods=['GET', 'POST'])
+def upload_video():
+    if request.method == 'POST':
+        video_file = request.files.get('video')
+        if not video_file or video_file.filename == '':
+            return "No file selected", 400
+
+        # Create a temporary directory to store all intermediate files
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Save uploaded video
+            video_path = os.path.join(tmpdir, video_file.filename)
+            video_file.save(video_path)
+
+            # Directory for extracted frames
+            frames_dir = os.path.join(tmpdir, 'frames')
+            os.makedirs(frames_dir, exist_ok=True)
+
+            # Extract frames (you can adjust sample_rate, e.g., 5 for every 5th frame)
+            frame_paths = extract_frames(video_path, frames_dir, sample_rate=1)
+            if not frame_paths:
+                return "No frames could be extracted from the video", 400
+
+            # Directory for cropped faces
+            faces_dir = os.path.join(tmpdir, 'faces')
+            os.makedirs(faces_dir, exist_ok=True)
+
+            # Crop faces
+            face_paths = crop_faces_from_frames(frame_paths, faces_dir)
+            if not face_paths:
+                return "No faces detected in the video", 200
+
+            # Create a ZIP archive with all face images
+            zip_path = os.path.join(tmpdir, 'faces.zip')
+            with zipfile.ZipFile(zip_path, 'w') as zf:
+                for face in face_paths:
+                    zf.write(face, arcname=os.path.basename(face))
+
+            # Send the ZIP file to the client
+            return send_file(zip_path, as_attachment=True, download_name='faces.zip')
+
+    return render_template_string(UPLOAD_FORM)
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)

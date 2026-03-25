@@ -2,10 +2,6 @@
 <html lang="en" class="dark">
 
 <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <meta charset="utf-8" />
-
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeepVerify · neural forensics</title>
@@ -18,9 +14,198 @@
         rel="stylesheet">
 
     <!-- Material Symbols (sharp, professional icons) -->
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,1" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,1" />
 
+    <style>
+        /* ---------- professional futuristic base ---------- */
+        body {
+            font-family: 'Space Grotesk', 'Inter', sans-serif;
+            background-color: #0c0c14;
+            color: #fff;
+            letter-spacing: 0.01em;
+        }
+
+        /* subtle grain texture */
+        .grain {
+            position: relative;
+        }
+        .grain::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJmIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjc0IiBudW1PY3RhdmVzPSIzIiAvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNmKSIgb3BhY2l0eT0iMC4wMjUiIC8+PC9zdmc+');
+            pointer-events: none;
+            opacity: 0.2;
+            z-index: 100;
+        }
+
+        .glass-deep {
+            background: rgba(12, 15, 25, 0.65);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(0, 255, 255, 0.15);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 20px 40px -15px rgba(32, 183, 189, 0.6), 0 0 0 1px rgba(0, 255, 255, 0.1) inset;
+        }
+
+        .glass-panel {
+            background: rgba(18, 22, 35, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 255, 255, 0.1);
+            box-shadow: 0 15px 35px -10px #00000080, 0 0 0 0.5px rgba(0, 255, 255, 0.1) inset;
+        }
+
+        .text-cyan {
+            color: #2df0ff;
+        }
+        .bg-cyan {
+            background-color: #2df0ff;
+        }
+        .border-cyan {
+            border-color: #2df0ff;
+        }
+
+        .neural-grid {
+            background-image: 
+                linear-gradient(rgba(45, 240, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(45, 240, 255, 0.03) 1px, transparent 1px);
+            background-size: 35px 35px;
+        }
+
+        /* ----- refined animations (professional, not cartoonish) ----- */
+        @keyframes core-pulse {
+            0% { opacity: 0.4; box-shadow: 0 0 0 0 rgba(45,240,255,0.3); }
+            70% { opacity: 0.8; box-shadow: 0 0 18px 4px rgba(45,240,255,0.2); }
+            100% { opacity: 0.4; box-shadow: 0 0 0 0 rgba(255, 188, 45, 0); }
+        }
+        .core-pulse {
+            animation: core-pulse 3s infinite ease-in-out;
+        }
+
+        @keyframes data-flow {
+            0% { transform: translateX(-30%) skewX(-5deg); opacity: 0; }
+            50% { opacity: 0.25; }
+            100% { transform: translateX(130%) skewX(-5deg); opacity: 0; }
+        }
+        .data-flow {
+            position: relative;
+            overflow: hidden;
+        }
+        .data-flow::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(45,240,255,0.15), transparent);
+            animation: data-flow 3.5s infinite;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* floating indicator */
+        @keyframes hover-glow {
+            0% { transform: translateY(0) scale(1); filter: brightness(1); }
+            50% { transform: translateY(-3px) scale(1.02); filter: brightness(1.2); }
+            100% { transform: translateY(0) scale(1); filter: brightness(1); }
+        }
+        .hover-glow-soft {
+            animation: hover-glow 5s infinite;
+        }
+
+        /* tab active style premium */
+        .tab-active-premium {
+            background: rgba(45, 240, 255, 0.12);
+            color: #2df0ff;
+            border-color: #2df0ff;
+            box-shadow: 0 0 15px rgba(45,240,255,0.2), 0 1px 0 #2df0ff inset, 0 -1px 0 #2df0ff inset;
+        }
+
+        /* scanning subtle line */
+        .scan-line {
+            position: relative;
+            isolation: isolate;
+        }
+        .scan-line::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, #2df0ff, transparent);
+            opacity: 0.4;
+            animation: scanMove 4s linear infinite;
+            pointer-events: none;
+            z-index: 5;
+        }
+        @keyframes scanMove {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(280px); } /* covers card height */
+            100% { transform: translateY(0); }
+        }
+
+        /* waveform refined */
+        .wave-bar-pro {
+            width: 3px;
+            height: 22px;
+            background: linear-gradient(to top, #2df0ff 0%, #a0f8ff 100%);
+            display: inline-block;
+            margin: 0 2px;
+            border-radius: 2px;
+            animation: wavePro 1.6s infinite ease;
+            opacity: 0.8;
+        }
+        @keyframes wavePro {
+            0%,100% { transform: scaleY(0.4); opacity: 0.4; }
+            50% { transform: scaleY(1.2); opacity: 1; }
+        }
+
+        /* rotating ring (minimalist) */
+        .ring-rotate {
+            animation: ringRotate 6s infinite linear;
+        }
+        @keyframes ringRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* blink dot */
+        .dot-intelligent {
+            width: 8px; height: 8px;
+            background: #2df0ff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #2df0ff;
+            animation: dotPulse 1.8s infinite;
+        }
+        @keyframes dotPulse {
+            0% { opacity: 0.7; box-shadow: 0 0 5px #2df0ff; }
+            50% { opacity: 1; box-shadow: 0 0 15px #2df0ff; }
+            100% { opacity: 0.7; box-shadow: 0 0 5px #2df0ff; }
+        }
+
+        /* subtle corner accents */
+        .corner-accent {
+            position: relative;
+        }
+        .corner-accent::after {
+            content: '';
+            position: absolute;
+            bottom: 12px; right: 12px;
+            width: 30px; height: 30px;
+            border-right: 1.5px solid rgba(45,240,255,0.25);
+            border-bottom: 1.5px solid rgba(45,240,255,0.25);
+            pointer-events: none;
+        }
+        .corner-accent::before {
+            content: '';
+            position: absolute;
+            top: 12px; left: 12px;
+            width: 30px; height: 30px;
+            border-left: 1.5px solid rgba(45,240,255,0.25);
+            border-top: 1.5px solid rgba(45,240,255,0.25);
+            pointer-events: none;
+        }
+    </style>
 </head>
 
 <body class="min-h-screen grain text-gray-200 antialiased">
@@ -299,7 +484,7 @@
                             scanBtn.innerHTML = `✅ AUTHENTIC 98.3%`;
 
                             setTimeout(() => {
-                                window.location.href = "auth.html";
+                                window.location.href = "auth";
                             }, 1000); // redirect after 1 second
                         }
                     }, 600);
@@ -345,6 +530,43 @@
             document.getElementById('fileInputVideo').addEventListener('change', () => document.getElementById('scanVideoBtn').innerText = 'RUN FORENSICS');
             document.getElementById('fileInputAudio').addEventListener('change', () => document.getElementById('scanAudioBtn').innerText = 'RUN FORENSICS');
         })();
+        document.getElementById('scanVideoBtn').addEventListener('click', function() {
+    const fileInput = document.getElementById('fileInputVideo');
+    const file = fileInput.files[0];
+    if (!file) {
+        alert('Please select a video.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const scanBtn = this;
+    scanBtn.disabled = true;
+    scanBtn.innerHTML = `<span class="material-symbols-outlined animate-spin">radar</span> Processing...`;
+
+    fetch('/upload_video', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            scanBtn.innerHTML = `✅ ${data.message}`;
+            setTimeout(() => {
+                window.location.href = "auth";
+            }, 1500);
+        } else {
+            scanBtn.innerHTML = `❌ Error: ${data.error}`;
+            scanBtn.disabled = false;
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        scanBtn.innerHTML = `❌ Upload failed`;
+        scanBtn.disabled = false;
+    });
+});
     </script>
 
     <!-- ========== FOOTER (minimal) ========== -->
