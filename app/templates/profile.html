@@ -23,16 +23,28 @@
 <body class="min-h-screen flex flex-col">
 
     <!-- ========== NAVBAR ========== -->
-    <nav class="fixed top-0 left-0 w-full z-50 bg-black/70 backdrop-blur-lg border-b border-white/5">
-        <div class="max-w-7xl mx-auto px-6 lg:px-20 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-primary">DEEP<span class="text-white">VERIFY</span></h1>
+<nav
+    class="fixed top-0 left-0 right-0 z-50 glass-morphism border-b border-white/5 px-6 lg:px-20 py-4 flex items-center justify-between animate-slideDown">
+    <div class="flex items-center gap-3 group">
+      <div class="text-primary transform transition-transform group-hover:scale-110 group-hover:rotate-12 duration-300">
+        <svg fill="none" height="32" viewbox="0 0 48 48" width="32" xmlns="http://www.w3.org/2000/svg">
+          <path d="M47.2426 24L24 47.2426L0.757355 24L24 0.757355L47.2426 24ZM12.2426 21H35.7574L24 9.24264L12.2426 21Z"
+            fill="currentColor"></path>
+        </svg>
+      </div>
+      <span
+        class="text-xl font-bold tracking-tight text-white uppercase italic transition-colors group-hover:text-primary">DeepVerify</span>
+    </div>
             <div class="flex gap-8 text-sm font-medium">
-                <a href="#" class="hover:text-primary transition">Home</a>
-                <a href="#" class="hover:text-primary transition">Scan</a>
-                <a href="#" class="text-primary border-b-2 border-primary pb-1">Profile</a>
+                <a href="index" class="hover:text-primary transition">Home</a>
+                <a href="upload" class="hover:text-primary transition">upload</a>
+                <a href="report" class="hover:text-primary transition">report</a>
+                <a href="howitworks" class="hover:text-primary transition">how it works</a>
+                <a href="profile" class="text-primary border-b-2 border-primary pb-1">Profile</a>
+                <a href="auth" class="hover:text-primary transition">authentication</a>
+
             </div>
-        </div>
-    </nav>
+  </nav>
 
     <!-- ========== MAIN PROFILE & SETTINGS SECTION ========== -->
     <section class="flex-1 flex items-start justify-center px-4 pt-32 pb-20">

@@ -44,7 +44,7 @@
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white overflow-x-hidden">
 
   <!-- TopNavBar -->
-  <nav
+<nav
     class="fixed top-0 left-0 right-0 z-50 glass-morphism border-b border-white/5 px-6 lg:px-20 py-4 flex items-center justify-between animate-slideDown">
     <div class="flex items-center gap-3 group">
       <div class="text-primary transform transition-transform group-hover:scale-110 group-hover:rotate-12 duration-300">
@@ -56,21 +56,15 @@
       <span
         class="text-xl font-bold tracking-tight text-white uppercase italic transition-colors group-hover:text-primary">DeepVerify</span>
     </div>
-    <div class="hidden md:flex items-center gap-10">
-      <a class="text-sm font-medium hover:text-primary transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
-        href="#">upload media</a>
-      <a class="text-sm font-medium hover:text-primary transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
-        href="#">dashboard</a>
-      <a class="text-sm font-medium hover:text-primary transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
-        href="#">report</a>
-      <a class="text-sm font-medium hover:text-primary transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
-        href="#">profile</a>
-    </div>
-    <a href="login">
-      <button
-        class="bg-primary hover:brightness-110 text-background-dark px-6 py-2 rounded font-bold text-sm tracking-wide transition-all duration-300 hover:scale-110 hover:shadow-[0_0_40px_rgba(0,233,250,0.6)] animate-pulse-gpu-accelerated">
-        sign up </button>
-    </a>
+            <div class="flex gap-8 text-sm font-medium">
+                <a href="index" class="text-primary border-b-2 border-primary pb-1">Home</a>
+                <a href="upload" class="hover:text-primary transition">upload</a>
+                <a href="report" class="hover:text-primary transition">report</a>
+                <a href="howitworks" class="hover:text-primary transition">how it works</a>
+                <a href="profile" class="hover:text-primary transition">Profile</a>
+                <a href="auth" class="hover:text-primary transition">authentication</a>
+
+            </div>
   </nav>
 
   <main class="pt-24">
