@@ -1,8 +1,8 @@
 import json
 import os
-from distutils.dir_util import copy_tree
 import shutil
 import pandas as pd
+import tensorflow as tf
 
 # TensorFlow and tf.keras
 import tensorflow as tf
@@ -10,11 +10,11 @@ from tensorflow.keras import backend as K
 print('TensorFlow version: ', tf.__version__)
 
 # Set to force CPU
-#os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-#if tf.test.gpu_device_name():
-#    print('GPU found')
-#else:
-#    print("No GPU found")
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+if tf.test.gpu_device_name():
+   print('GPU found')
+else:
+   print("No GPU found")
 
 dataset_path = '.\\split_dataset\\'
 
@@ -29,7 +29,7 @@ def get_filename_only(file_path):
 
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras import applications
-from efficientnet.tfkeras import EfficientNetB0 #EfficientNetB1, EfficientNetB2, EfficientNetB3, EfficientNetB4, EfficientNetB5, EfficientNetB6, EfficientNetB7
+from tensorflow.keras.applications import EfficientNetB0
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.optimizers import Adam
@@ -108,7 +108,7 @@ model.add(Dense(units = 1, activation = 'sigmoid'))
 model.summary()
 
 # Compile model
-model.compile(optimizer = Adam(lr=0.0001), loss='binary_crossentropy', metrics=['accuracy'])
+model.compile(optimizer = Adam(learning_rate=0.0001), loss='binary_crossentropy', metrics=['accuracy'])
 
 checkpoint_filepath = '.\\tmp_checkpoint'
 print('Creating Directory: ' + checkpoint_filepath)
@@ -132,7 +132,7 @@ custom_callbacks = [
 
 # Train network
 num_epochs = 20
-history = model.fit_generator(
+history = model.fit(
     train_generator,
     epochs = num_epochs,
     steps_per_epoch = len(train_generator),

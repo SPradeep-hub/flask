@@ -136,6 +136,33 @@
                 </div>
             </div>
         </div>
+            <!-- ===== VIDEO PANEL (same refined style) ===== -->
+            <div id="panelVideo" class="tab-panel hidden transition-opacity duration-500">
+                <div class="grid md:grid-cols-2 gap-8 items-stretch">
+                    <div id="dropZoneVideo"
+                        class="glass-panel rounded-2xl border-2 border-dashed border-cyan/30 p-8 text-center cursor-pointer hover:border-cyan/70 transition-all data-flow">
+                        <span
+                            class="material-symbols-outlined text-6xl text-cyan/60 group-hover:text-cyan/90 transition-all ring-rotate inline-block">videocam</span>
+                        <h3 class="text-xl font-medium mt-4 text-white/90">Upload video</h3>
+                        <p class="text-gray-400 text-sm mt-2">MP4, MOV, WebM · up to 200 MB</p>
+                        <input type="file" id="fileInputVideo" style="display:block; margin-top:10px;"
+                            accept="video/mp4,video/quicktime,video/webm">
+                        <button onclick="document.getElementById('fileInputVideo').click()"
+                            class="mt-6 bg-cyan/10 border border-cyan/40 text-cyan px-8 py-2.5 rounded-full text-sm font-medium tracking-wide hover:bg-cyan/20">SELECT
+                            FILE</button>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-6 flex flex-col items-center justify-center border border-cyan/20"
+                        id="videoPreviewPanel">
+                        <div id="videoPreviewContent" class="w-full flex flex-col items-center">
+                            <span class="material-symbols-outlined text-5xl text-cyan/40">movie</span>
+                            <p class="text-gray-400 text-sm mt-4">awaiting video</p>
+                        </div>
+                        <button id="scanVideoBtn"
+                            class="mt-6 bg-cyan/10 border border-cyan/30 text-cyan/90 px-8 py-3 rounded-full font-mono text-sm w-full hover:bg-cyan hover:text-black disabled:opacity-30"
+                            disabled>RUN FORENSICS</button>
+                    </div>
+                </div>
+            </div>
 
         <!-- ===== AUDIO PANEL ===== -->
         <div id="panelAudio" class="tab-panel hidden transition-opacity duration-500">
