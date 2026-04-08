@@ -19,37 +19,37 @@ def home():
 # Login page
 @app.route("/login")
 def login():
-    return render_template("login.html")
+    return render_template("/login")
 
 # Auth page 
 @app.route("/auth")
 def auth():
-    return render_template("auth.html")
+    return render_template("/auth")
 
 # How it works page
 @app.route("/howitworks")
 def how():
-    return render_template("howitworks.html")
+    return render_template("/howitworks")
 
 #profile page
 @app.route("/profile")
 def profile():
-    return render_template("profile.html")
+    return render_template("/profile")
 
 #report page
 @app.route("/report")
 def report():
-    return render_template("report.html")
+    return render_template("/report")
 
 #upload page
 @app.route("/upload")
 def upload():
-    return render_template("upload.html")
+    return render_template("/upload")
 
 
 @app.route("/index")
 def index():
-    return render_template("index.html")
+    return render_template("/index")
 
 
 # main = Blueprint('main', __name__)

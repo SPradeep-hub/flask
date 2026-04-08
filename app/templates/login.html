@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeepVerify · login / sign up</title>
@@ -12,68 +13,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0,1" />
 
-    <style>
-        * {
-            font-family: 'Space Grotesk', sans-serif;
-        }
-        body {
-            background-color: #0a0a0f;
-            color: white;
-        }
-
-        .text-primary {
-            color: #00e9fa;
-        }
-        .bg-primary {
-            background-color: #00e9fa;
-        }
-        .border-primary {
-            border-color: #00e9fa;
-        }
-        .glass-panel {
-            background: rgba(20, 25, 35, 0.7);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(0, 233, 250, 0.15);
-        }
-
-        /* animations */
-        @keyframes float-bg {
-            0% { transform: translateY(0px) translateX(0px); }
-            50% { transform: translateY(-20px) translateX(10px); }
-            100% { transform: translateY(0px) translateX(0px); }
-        }
-        .animate-float-bg {
-            animation: float-bg 18s infinite ease-in-out;
-        }
-
-        @keyframes glow-pulse {
-            0%,100% { box-shadow: 0 0 20px rgba(0,233,250,0.2); }
-            50% { box-shadow: 0 0 60px rgba(0,233,250,0.6); }
-        }
-        .glow-pulse {
-            animation: glow-pulse 3s infinite;
-        }
-
-        .hover-glow:hover {
-            box-shadow: 0 0 25px rgba(0,233,250,0.5);
-            transition: box-shadow 0.3s;
-        }
-
-        /* neural grid background */
-        .neural-bg {
-            background-image: 
-                linear-gradient(rgba(0,233,250,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,233,250,0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
-
-        .tab-active {
-            background: rgba(0, 233, 250, 0.15);
-            color: #00e9fa;
-            border-color: #00e9fa;
-            font-weight: 600;
-        }
-    </style>
 </head>
 <body class="min-h-screen flex items-center justify-center neural-bg relative overflow-x-hidden">
 
@@ -299,7 +238,7 @@ class="w-full bg-primary text-black py-4 rounded-xl font-bold text-base tracking
         window.handleSignup = handleSignup;
     
         function goToUpload() {
-        window.location.href = "upload.html";
+        window.location.href = "/upload";
         }
 
     </script>
