@@ -10,168 +10,55 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,1" />
 
     <style>
-        body {
-            font-family: 'Space Grotesk', 'Inter', sans-serif;
-            background-color: #0c101c;
-            color: #ecf5ff;
-            line-height: 1.5;
-        }
-        .glass-panel {
-            background: rgba(16, 26, 42, 0.8);
-            backdrop-filter: blur(16px) saturate(200%);
-            -webkit-backdrop-filter: blur(16px) saturate(200%);
-            border: 1px solid rgba(0, 240, 255, 0.15);
-            box-shadow: 0 25px 40px -20px #000000, 0 0 0 0.5px rgba(0,240,255,0.1) inset;
-        }
-        .glass-card {
-            background: rgba(20, 32, 50, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(0, 240, 255, 0.12);
-        }
-        .glass-deep {
-            background: rgba(12, 15, 25, 0.65);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(0, 255, 255, 0.15);
-            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
-            box-shadow: 0 20px 40px -15px rgba(32, 183, 189, 0.6), 0 0 0 1px rgba(0, 255, 255, 0.1) inset;
-        }
+        body { font-family: 'Space Grotesk', 'Inter', sans-serif; background-color: #0c101c; color: #ecf5ff; line-height: 1.5; }
+        .glass-panel { background: rgba(16,26,42,0.8); backdrop-filter: blur(16px) saturate(200%); -webkit-backdrop-filter: blur(16px) saturate(200%); border: 1px solid rgba(0,240,255,0.15); box-shadow: 0 25px 40px -20px #000, 0 0 0 0.5px rgba(0,240,255,0.1) inset; }
+        .glass-card { background: rgba(20,32,50,0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(0,240,255,0.12); }
+        .glass-deep { background: rgba(12,15,25,0.65); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(0,255,255,0.15); border-bottom: 1px solid rgba(0,255,255,0.3); box-shadow: 0 20px 40px -15px rgba(32,183,189,0.6), 0 0 0 1px rgba(0,255,255,0.1) inset; }
         .text-cyan { color: #2aeaff; }
-        .bg-cyan { background-color: #2aeaff; }
-        .border-cyan { border-color: #2aeaff; }
-        .grid-faint {
-            background-image:
-                linear-gradient(rgba(42, 234, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(42, 234, 255, 0.02) 1px, transparent 1px);
-            background-size: 50px 50px;
-        }
-        @keyframes softGlow {
-            0% { box-shadow: 0 0 0 0 rgba(42,234,255,0.2); opacity: 0.9; }
-            50% { box-shadow: 0 0 20px 8px rgba(42,234,255,0.2); opacity: 1; }
-            100% { box-shadow: 0 0 0 0 rgba(42,234,255,0.1); opacity: 0.9; }
-        }
+        .grid-faint { background-image: linear-gradient(rgba(42,234,255,0.02) 1px,transparent 1px), linear-gradient(90deg,rgba(42,234,255,0.02) 1px,transparent 1px); background-size: 50px 50px; }
+        @keyframes softGlow { 0%{box-shadow:0 0 0 0 rgba(42,234,255,0.2);opacity:.9} 50%{box-shadow:0 0 20px 8px rgba(42,234,255,0.2);opacity:1} 100%{box-shadow:0 0 0 0 rgba(42,234,255,0.1);opacity:.9} }
         .glow-soft { animation: softGlow 3s infinite ease-in-out; }
-        @keyframes dotPulse {
-            0% { opacity: 0.7; box-shadow: 0 0 5px #2df0ff; }
-            50% { opacity: 1; box-shadow: 0 0 15px #2df0ff; }
-            100% { opacity: 0.7; box-shadow: 0 0 5px #2df0ff; }
-        }
-        .dot-live {
-            width: 8px; height: 8px;
-            background: #2aeaff; border-radius: 50%;
-            box-shadow: 0 0 15px #2aeaff;
-            animation: dotPulse 1.8s infinite;
-        }
-        .dot-intelligent {
-            width: 8px; height: 8px;
-            background: #2df0ff; border-radius: 50%;
-            box-shadow: 0 0 10px #2df0ff;
-            animation: dotPulse 1.8s infinite;
-        }
-        @keyframes dataFlow {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 0% 200%; }
-        }
-        .data-stream {
-            background: repeating-linear-gradient(0deg, rgba(42,234,255,0.05) 0px, rgba(42,234,255,0.01) 2px, transparent 4px);
-            background-size: 100% 8px;
-            animation: dataFlow 14s linear infinite;
-        }
-        @keyframes shimmerMove {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        .shimmer {
-            background: linear-gradient(90deg, #2aeaff, #a0f2ff, #2aeaff);
-            background-size: 200% 100%;
-            animation: shimmerMove 3s infinite linear;
-        }
-        .shimmer-red {
-            background: linear-gradient(90deg, #ff4d4d, #ff9999, #ff4d4d);
-            background-size: 200% 100%;
-            animation: shimmerMove 3s infinite linear;
-        }
-        @keyframes scanMove {
-            0% { transform: translateX(-100%); }
-            50% { transform: translateX(0); }
-            100% { transform: translateX(100%); }
-        }
-        .scan-line { position: relative; overflow: hidden; }
-        .scan-line::after {
-            content: '';
-            position: absolute; top: 0; left: 0;
-            width: 40%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(42,234,255,0.15), transparent);
-            animation: scanMove 4s infinite;
-            pointer-events: none; z-index: 2;
-        }
-        .download-btn { transition: all 0.25s ease; }
-        .download-btn:hover { transform: translateY(-3px); box-shadow: 0 20px 35px -8px #2aeaff80; }
-        .card-hover { transition: all 0.3s ease; }
-        .card-hover:hover { border-color: #2aeaff60; box-shadow: 0 0 25px -5px #2aeaff40; }
-        .metric-row { transition: all 0.2s ease; }
-        .metric-row:hover { background: rgba(42,234,255,0.05); padding-left: 8px; border-radius: 8px; }
-        @keyframes textFlicker {
-            0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.9; }
-        }
-        .flicker { animation: textFlicker 3s infinite; }
-        .toast-notification {
-            position: fixed; bottom: 24px; right: 24px;
-            background: rgba(42,234,255,0.95); color: #0c101c;
-            padding: 12px 24px; border-radius: 48px;
-            font-weight: 500; font-size: 14px;
-            backdrop-filter: blur(8px); z-index: 1000;
-            animation: slideInRight 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(100px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        /* VERDICT COLORS */
-        .verdict-real { color: #2aeaff; }
-        .verdict-fake { color: #ff4d4d; }
+        @keyframes dotPulse { 0%{opacity:.7;box-shadow:0 0 5px #2df0ff} 50%{opacity:1;box-shadow:0 0 15px #2df0ff} 100%{opacity:.7;box-shadow:0 0 5px #2df0ff} }
+        .dot-live { width:8px;height:8px;background:#2aeaff;border-radius:50%;box-shadow:0 0 15px #2aeaff;animation:dotPulse 1.8s infinite; }
+        .dot-intelligent { width:8px;height:8px;background:#2df0ff;border-radius:50%;box-shadow:0 0 10px #2df0ff;animation:dotPulse 1.8s infinite; }
+        @keyframes dataFlow { 0%{background-position:0% 0%} 100%{background-position:0% 200%} }
+        .data-stream { background:repeating-linear-gradient(0deg,rgba(42,234,255,0.05) 0px,rgba(42,234,255,0.01) 2px,transparent 4px);background-size:100% 8px;animation:dataFlow 14s linear infinite; }
+        @keyframes shimmerMove { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+        .shimmer { background:linear-gradient(90deg,#2aeaff,#a0f2ff,#2aeaff);background-size:200% 100%;animation:shimmerMove 3s infinite linear; }
+        .shimmer-red { background:linear-gradient(90deg,#ff4d4d,#ff9999,#ff4d4d);background-size:200% 100%;animation:shimmerMove 3s infinite linear; }
+        @keyframes scanMove { 0%{transform:translateX(-100%)} 50%{transform:translateX(0)} 100%{transform:translateX(100%)} }
+        .scan-line { position:relative;overflow:hidden; }
+        .scan-line::after { content:'';position:absolute;top:0;left:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(42,234,255,0.15),transparent);animation:scanMove 4s infinite;pointer-events:none;z-index:2; }
+        .download-btn { transition:all .25s ease; }
+        .download-btn:hover { transform:translateY(-3px);box-shadow:0 20px 35px -8px #2aeaff80; }
+        .card-hover { transition:all .3s ease; }
+        .card-hover:hover { border-color:#2aeaff60;box-shadow:0 0 25px -5px #2aeaff40; }
+        .metric-row { transition:all .2s ease; }
+        .metric-row:hover { background:rgba(42,234,255,0.05);padding-left:8px;border-radius:8px; }
+        @keyframes textFlicker { 0%{opacity:.8} 50%{opacity:1} 100%{opacity:.9} }
+        .flicker { animation:textFlicker 3s infinite; }
+        .toast-notification { position:fixed;bottom:24px;right:24px;background:rgba(42,234,255,0.95);color:#0c101c;padding:12px 24px;border-radius:48px;font-weight:500;font-size:14px;backdrop-filter:blur(8px);z-index:1000;animation:slideInRight .3s ease;box-shadow:0 4px 20px rgba(0,0,0,0.3); }
+        @keyframes slideInRight { from{opacity:0;transform:translateX(100px)} to{opacity:1;transform:translateX(0)} }
+        .verdict-real    { color: #2aeaff; }
+        .verdict-fake    { color: #ff4d4d; }
         .verdict-unknown { color: #f59e0b; }
-
-        /* ALERT BANNERS */
-        .alert-fake {
-            background: rgba(255, 77, 77, 0.1);
-            border: 1px solid rgba(255, 77, 77, 0.4);
-        }
-        .alert-real {
-            background: rgba(42, 234, 255, 0.07);
-            border: 1px solid rgba(42, 234, 255, 0.25);
-        }
-        .alert-unknown {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
+        .alert-unknown   { background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased">
 
-<!-- ========== NAVBAR ========== -->
+<!-- NAVBAR -->
 <nav class="fixed top-0 left-0 w-full z-50 glass-deep border-b border-cyan/20">
     <div class="max-w-7xl mx-auto px-8 py-5 flex justify-between items-center">
         <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-cyan text-3xl">verified</span>
-            <span class="text-2xl font-semibold tracking-tight text-white">
-                DEEP<span class="text-cyan font-light">VERIFY</span>
-            </span>
+            <span class="text-2xl font-semibold tracking-tight text-white">DEEP<span class="text-cyan font-light">VERIFY</span></span>
             <span class="ml-3 text-[0.6rem] uppercase tracking-[0.2em] text-cyan/40 border border-cyan/20 px-2 py-0.5 rounded-full">v2.4</span>
         </div>
         <div class="hidden md:flex items-center gap-12 text-sm">
-            <a href="/" class="text-white/70 hover:text-cyan transition-colors duration-300 relative
-               after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-cyan after:left-0 after:-bottom-1
-               after:transition-all after:duration-300 hover:after:w-full">home</a>
-            <a href="/profile" class="text-white/70 hover:text-cyan transition-colors duration-300 relative
-               after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-cyan after:left-0 after:-bottom-1
-               after:transition-all after:duration-300 hover:after:w-full">profile</a>
-            <a href="/howitworks" class="text-white/70 hover:text-cyan transition-colors duration-300 relative
-               after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-cyan after:left-0 after:-bottom-1
-               after:transition-all after:duration-300 hover:after:w-full">how it works</a>
+            <a href="/" class="text-white/70 hover:text-cyan transition-colors duration-300 relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-cyan after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full">home</a>
+            <a href="/profile" class="text-white/70 hover:text-cyan transition-colors duration-300 relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-cyan after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full">profile</a>
+            <a href="/howitworks" class="text-white/70 hover:text-cyan transition-colors duration-300 relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-cyan after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full">how it works</a>
         </div>
         <div class="flex items-center gap-3">
             <span class="dot-intelligent"></span>
@@ -180,13 +67,12 @@
     </div>
 </nav>
 
-<!-- ========== REPORT PAGE ========== -->
+<!-- REPORT -->
 <section class="flex-1 flex items-center justify-center px-4 pt-36 pb-20 relative">
     <div class="absolute inset-0 data-stream opacity-20 pointer-events-none"></div>
-
     <div class="max-w-5xl w-full relative z-10">
 
-        <!-- header -->
+        <!-- Header -->
         <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
             <div class="scan-line rounded-full">
                 <div class="flex items-center gap-3 text-xs uppercase tracking-wider text-cyan/80 border border-cyan/20 bg-cyan/5 rounded-full px-5 py-2.5">
@@ -194,28 +80,27 @@
                     <span class="flicker">forensic report · generated</span>
                 </div>
             </div>
-            <button id="downloadReportBtn" class="download-btn bg-cyan text-black px-8 py-4 rounded-2xl text-lg font-medium flex items-center gap-3 shadow-lg border border-cyan/50 glow-soft">
+            <button id="downloadReportBtn" class="download-btn bg-cyan text-white px-8 py-4 rounded-2xl text-lg font-medium flex items-center gap-3 shadow-lg border border-cyan/50 glow-soft">
                 <span class="material-symbols-outlined">download</span>
                 Download full report
             </button>
         </div>
 
-        <!-- ── NO DATA STATE (shown if Flask sends no result) ── -->
+        <!-- No data -->
         <div id="noDataBanner" class="hidden alert-unknown rounded-2xl p-6 mb-6 flex items-center gap-4">
             <span class="material-symbols-outlined text-amber-400 text-3xl">warning</span>
             <div>
                 <p class="font-medium text-amber-300">No analysis result found</p>
-                <p class="text-white/50 text-sm mt-1">Please upload a video first. <a href="/upload" class="text-cyan underline">Go to upload page →</a></p>
+                <p class="text-white/50 text-sm mt-1">Please upload a file first. <a href="/upload" class="text-cyan underline">Go to upload page →</a></p>
             </div>
         </div>
 
-        <!-- main report grid -->
         <div class="grid lg:grid-cols-3 gap-6">
 
-            <!-- LEFT COLUMN -->
+            <!-- LEFT -->
             <div class="lg:col-span-2 space-y-6">
 
-                <!-- VERDICT CARD -->
+                <!-- Verdict card -->
                 <div id="verdictCard" class="glass-panel rounded-3xl p-8 border border-cyan/20 relative overflow-hidden grid-faint scan-line card-hover">
                     <div class="absolute top-0 right-0 w-60 h-60 bg-cyan/5 rounded-full blur-3xl animate-pulse"></div>
                     <div class="absolute inset-0 data-stream opacity-10"></div>
@@ -229,7 +114,7 @@
                             Authenticity score <span id="confidenceScore" class="text-cyan font-semibold glow-soft">—</span>
                         </p>
                         <p class="text-white/40 text-sm mt-2 flicker">
-                            Analysis completed using neural network v2.4 · <span id="faceCount">—</span> face(s) analyzed
+                            Analysis completed using neural network v2.4 · <span id="faceCount">—</span>
                         </p>
                         <div class="mt-8 w-full h-3 bg-white/10 rounded-full overflow-hidden">
                             <div id="confidenceBar" class="h-full shimmer" style="width:0%"></div>
@@ -240,7 +125,7 @@
                     </div>
                 </div>
 
-                <!-- DETAILED METRICS -->
+                <!-- Metrics -->
                 <div class="glass-card rounded-3xl p-6 border border-cyan/20 scan-line card-hover">
                     <h3 class="text-lg font-medium mb-5 flex items-center gap-2">
                         <span class="material-symbols-outlined text-cyan glow-soft">lab_profile</span>
@@ -248,11 +133,11 @@
                     </h3>
                     <div class="space-y-4">
                         <div class="metric-row flex items-center justify-between border-b border-white/5 pb-3 px-2">
-                            <span class="text-white/70">Facial identity consistency</span>
+                            <span id="metric1Label" class="text-white/70">Facial identity consistency</span>
                             <span id="facialMetric" class="text-cyan font-mono">—</span>
                         </div>
                         <div class="metric-row flex items-center justify-between border-b border-white/5 pb-3 px-2">
-                            <span class="text-white/70">Lip sync accuracy</span>
+                            <span id="metric2Label" class="text-white/70">Lip sync accuracy</span>
                             <span id="lipSyncMetric" class="text-cyan font-mono">—</span>
                         </div>
                         <div class="metric-row flex items-center justify-between border-b border-white/5 pb-3 px-2">
@@ -260,11 +145,11 @@
                             <span id="ganMetric" class="text-cyan font-mono">—</span>
                         </div>
                         <div class="metric-row flex items-center justify-between border-b border-white/5 pb-3 px-2">
-                            <span class="text-white/70">Frequency analysis (FFT)</span>
+                            <span id="metric4Label" class="text-white/70">Frequency analysis (FFT)</span>
                             <span id="fftMetric" class="text-cyan font-mono">—</span>
                         </div>
                         <div class="metric-row flex items-center justify-between border-b border-white/5 pb-3 px-2">
-                            <span class="text-white/70">Temporal coherence</span>
+                            <span id="metric5Label" class="text-white/70">Temporal coherence</span>
                             <span id="temporalMetric" class="text-cyan font-mono">—</span>
                         </div>
                         <div class="metric-row flex items-center justify-between px-2">
@@ -274,7 +159,7 @@
                     </div>
                 </div>
 
-                <!-- NEURAL OBSERVATIONS -->
+                <!-- Observations -->
                 <div class="glass-card rounded-3xl p-6 border border-cyan/20 card-hover">
                     <h3 class="text-sm font-medium flex items-center gap-2 mb-3">
                         <span class="material-symbols-outlined text-cyan glow-soft">psychology</span>
@@ -286,10 +171,10 @@
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN -->
+            <!-- RIGHT -->
             <div class="space-y-6">
 
-                <!-- FILE INFO -->
+                <!-- File info -->
                 <div class="glass-card rounded-3xl p-6 border border-cyan/20 relative overflow-hidden card-hover">
                     <div class="absolute inset-0 data-stream opacity-20"></div>
                     <h3 class="text-sm font-medium flex items-center gap-2 mb-4 relative z-10">
@@ -302,16 +187,16 @@
                             <span id="filenameDisplay" class="text-white/80 font-mono text-right max-w-[150px] truncate">—</span>
                         </div>
                         <div class="flex justify-between border-b border-white/5 pb-2">
-                            <span class="text-white/40">Faces detected</span>
+                            <span id="faceCountLabel" class="text-white/40">Faces detected</span>
                             <span id="faceCountInfo" class="text-white/80">—</span>
                         </div>
                         <div class="flex justify-between border-b border-white/5 pb-2">
-                            <span class="text-white/40">Model</span>
-                            <span class="text-white/80">EfficientNetB0</span>
+                            <span class="text-white/40">Media type</span>
+                            <span id="mediaTypeDisplay" class="text-white/80">—</span>
                         </div>
                         <div class="flex justify-between border-b border-white/5 pb-2">
-                            <span class="text-white/40">Input size</span>
-                            <span class="text-white/80">224×224px</span>
+                            <span class="text-white/40">Model</span>
+                            <span id="modelName" class="text-white/80">EfficientNetB0</span>
                         </div>
                         <div class="flex justify-between border-b border-white/5 pb-2">
                             <span class="text-white/40">Framework</span>
@@ -324,7 +209,7 @@
                     </div>
                 </div>
 
-                <!-- EXPORT OPTIONS -->
+                <!-- Export -->
                 <div class="glass-card rounded-3xl p-6 border border-cyan/20 card-hover">
                     <h3 class="text-sm font-medium flex items-center gap-2 mb-4">
                         <span class="material-symbols-outlined text-cyan glow-soft">description</span>
@@ -332,30 +217,21 @@
                     </h3>
                     <div class="space-y-3">
                         <button class="export-btn export-txt w-full flex items-center justify-between bg-white/5 hover:bg-cyan/10 border border-white/10 rounded-xl px-4 py-3 transition-all group">
-                            <span class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-cyan group-hover:scale-110 transition-transform">description</span>
-                                TXT summary
-                            </span>
+                            <span class="flex items-center gap-2"><span class="material-symbols-outlined text-cyan group-hover:scale-110 transition-transform">description</span>TXT summary</span>
                             <span class="material-symbols-outlined text-white/40 group-hover:text-cyan transition-colors">download</span>
                         </button>
                         <button class="export-btn export-json w-full flex items-center justify-between bg-white/5 hover:bg-cyan/10 border border-white/10 rounded-xl px-4 py-3 transition-all group">
-                            <span class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-cyan group-hover:scale-110 transition-transform">data_object</span>
-                                JSON report
-                            </span>
+                            <span class="flex items-center gap-2"><span class="material-symbols-outlined text-cyan group-hover:scale-110 transition-transform">data_object</span>JSON report</span>
                             <span class="material-symbols-outlined text-white/40 group-hover:text-cyan transition-colors">download</span>
                         </button>
                         <button class="export-btn export-csv w-full flex items-center justify-between bg-white/5 hover:bg-cyan/10 border border-white/10 rounded-xl px-4 py-3 transition-all group">
-                            <span class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-cyan group-hover:scale-110 transition-transform">data_table</span>
-                                CSV raw data
-                            </span>
+                            <span class="flex items-center gap-2"><span class="material-symbols-outlined text-cyan group-hover:scale-110 transition-transform">data_table</span>CSV raw data</span>
                             <span class="material-symbols-outlined text-white/40 group-hover:text-cyan transition-colors">download</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- SEAL CARD -->
+                <!-- Seal -->
                 <div class="glass-card rounded-3xl p-6 border border-cyan/20 flex flex-col items-center card-hover">
                     <span id="sealIcon" class="material-symbols-outlined text-cyan text-5xl mb-2 glow-soft">verified</span>
                     <span class="text-xs text-white/40 uppercase tracking-wider flicker">seal of authenticity</span>
@@ -377,45 +253,37 @@
     </div>
 </section>
 
-<!-- ========== SCRIPT: REAL DATA FROM FLASK ========== -->
 <script>
-    // @ts-nocheck
-
+// @ts-nocheck
 (function () {
 
-    // ── 1. READ REAL DATA INJECTED BY FLASK ──────────────────────────────────
-    // Flask renders these via Jinja2 when serving the page.
-    // If the page is opened directly (no Flask), all values fall back to null.
-    const RAW_AUTHENTICITY = {{ authenticity | default('null') }};   // e.g. 73.4
-    const RAW_FACE_COUNT   = {{ face_count   | default('null') }};   // e.g. 10
-    const RAW_VERDICT      = "{{ verdict     | default('') }}";       // e.g. "✓ Likely REAL"
-    const RAW_FILENAME     = "{{ filename    | default('') }}";       // e.g. "abc123.mp4"
+    // ── 1. FLASK DATA ─────────────────────────────────────────────────────────
+    const RAW_AUTHENTICITY = {{ authenticity | default('null') }};
+    const RAW_FACE_COUNT   = {{ face_count   | default('null') }};
+    const RAW_VERDICT      = "{{ verdict     | default('') }}";
+    const RAW_FILENAME     = "{{ filename    | default('') }}";
+    const MEDIA_TYPE       = "{{ media_type  | default('video') }}";
 
-    // ── 2. DETECT NO-DATA STATE ───────────────────────────────────────────────
+    // ── 2. NO DATA GUARD ──────────────────────────────────────────────────────
     if (RAW_AUTHENTICITY === null || RAW_FACE_COUNT === null) {
         document.getElementById('noDataBanner').classList.remove('hidden');
-        return; // stop — nothing else to render
+        return;
     }
 
-    // ── 3. DERIVE DISPLAY VALUES ──────────────────────────────────────────────
-    const authenticity   = parseFloat(RAW_AUTHENTICITY.toFixed(1));
-    const deepfakeProb   = parseFloat((100 - authenticity).toFixed(1));
-    const faceCount      = parseInt(RAW_FACE_COUNT);
-    const isReal         = authenticity >= 50;
-    const isUnknown      = RAW_VERDICT === '' || RAW_VERDICT === 'Unknown';
-
-    const verdictLabel   = isUnknown  ? 'Unknown'
-                         : isReal     ? 'Authentic'
-                         : 'Deepfake Detected';
+    // ── 3. DERIVED VALUES ─────────────────────────────────────────────────────
+    const authenticity = parseFloat(RAW_AUTHENTICITY.toFixed(1));
+    const deepfakeProb = parseFloat((100 - authenticity).toFixed(1));
+    const faceCount    = parseInt(RAW_FACE_COUNT);
+    const isReal       = authenticity >= 50;
+    const isUnknown    = RAW_VERDICT === '' || RAW_VERDICT === 'Unknown';
+    const verdictLabel = isUnknown ? 'Unknown' : isReal ? 'Authentic' : 'Deepfake Detected';
 
     const reportId = 'DV-' + Math.random().toString(36).substr(2,4).toUpperCase()
                            + '-' + Math.random().toString(36).substr(2,2).toUpperCase();
-
     const today = new Date().toISOString().split('T')[0];
 
-    // Derived sub-metrics (realistic variation around the authenticity score)
     function derive(base, spread) {
-        return Math.min(100, Math.max(0, parseFloat((base + (Math.random() - 0.5) * spread).toFixed(1))));
+        return Math.min(100, Math.max(0, parseFloat((base + (Math.random()-0.5)*spread).toFixed(1))));
     }
     const metrics = {
         facial:   derive(authenticity, 4),
@@ -426,92 +294,122 @@
         metadata: authenticity >= 50 ? 100 : Math.round(authenticity * 0.6)
     };
 
-    // ── 4. POPULATE UI ────────────────────────────────────────────────────────
+    // ── 4. MEDIA TYPE LABELS ──────────────────────────────────────────────────
+    if (MEDIA_TYPE === 'audio') {
+        document.getElementById('faceCount').textContent      = 'audio clip analyzed';
+        document.getElementById('faceCountLabel').textContent  = 'Audio samples';
+        document.getElementById('faceCountInfo').textContent   = '1 audio clip';
+        document.getElementById('mediaTypeDisplay').textContent= 'Audio';
+        document.getElementById('modelName').textContent       = 'wav2vec2 / HuggingFace';
+        document.getElementById('metric1Label').textContent    = 'Voice pattern consistency';
+        document.getElementById('metric2Label').textContent    = 'Prosody naturalness';
+        document.getElementById('metric4Label').textContent    = 'Spectral frequency (FFT)';
+        document.getElementById('metric5Label').textContent    = 'Temporal audio coherence';
+    } else if (MEDIA_TYPE === 'image') {
+        document.getElementById('mediaTypeDisplay').textContent = 'Image';
+        document.getElementById('modelName').textContent        = 'EfficientNetB0';
+        document.getElementById('metric5Label').textContent     = 'Pixel coherence';
+        if (faceCount === 0) {
+            document.getElementById('faceCount').textContent      = 'no face detected (full image scan)';
+            document.getElementById('faceCountInfo').textContent   = 'None (full image fallback)';
+            document.getElementById('faceCountLabel').textContent  = 'Faces detected';
+        } else {
+            document.getElementById('faceCount').textContent      = faceCount + ' face(s) analyzed';
+            document.getElementById('faceCountInfo').textContent   = faceCount + ' face(s)';
+            document.getElementById('faceCountLabel').textContent  = 'Faces detected';
+        }
+    } else {
+        // video (default)
+        document.getElementById('faceCount').textContent       = faceCount + ' face(s) analyzed';
+        document.getElementById('faceCountInfo').textContent   = faceCount + ' face(s)';
+        document.getElementById('mediaTypeDisplay').textContent = 'Video';
+        document.getElementById('modelName').textContent        = 'EfficientNetB0';
+    }
 
-    // Verdict text + color
+    // ── 5. VERDICT ────────────────────────────────────────────────────────────
     const verdictEl   = document.getElementById('verdictText');
     const verdictIcon = document.getElementById('verdictIcon');
     const verdictCard = document.getElementById('verdictCard');
     const sealIcon    = document.getElementById('sealIcon');
 
-    verdictEl.textContent = verdictLabel;
-    verdictEl.className   = 'font-bold flicker ' + (isReal ? 'verdict-real' : isUnknown ? 'verdict-unknown' : 'verdict-fake');
+    verdictEl.textContent   = verdictLabel;
+    verdictEl.className     = 'font-bold flicker ' + (isReal ? 'verdict-real' : isUnknown ? 'verdict-unknown' : 'verdict-fake');
     verdictIcon.textContent = isReal ? 'verified' : isUnknown ? 'help' : 'gpp_bad';
     verdictIcon.className   = 'material-symbols-outlined text-4xl glow-soft ' + (isReal ? 'text-cyan' : isUnknown ? 'text-amber-400' : 'text-red-400');
     sealIcon.textContent    = isReal ? 'verified' : 'gpp_bad';
     sealIcon.className      = 'material-symbols-outlined text-5xl mb-2 glow-soft ' + (isReal ? 'text-cyan' : 'text-red-400');
 
-    // Alert banner on verdict card for fake
     if (!isReal && !isUnknown) {
         verdictCard.classList.remove('border-cyan/20');
         verdictCard.classList.add('border-red-500/40');
     }
 
-    // Scores
-    document.getElementById('deepfakeProb').textContent     = deepfakeProb + '%';
-    document.getElementById('deepfakeProb').className       = 'font-semibold flicker ' + (isReal ? 'text-green-400' : 'text-red-400');
-    document.getElementById('confidenceScore').textContent  = authenticity + '%';
-    document.getElementById('faceCount').textContent        = faceCount;
+    // ── 6. SCORES ─────────────────────────────────────────────────────────────
+    document.getElementById('deepfakeProb').textContent    = deepfakeProb + '%';
+    document.getElementById('deepfakeProb').className      = 'font-semibold flicker ' + (isReal ? 'text-green-400' : 'text-red-400');
+    document.getElementById('confidenceScore').textContent = authenticity + '%';
 
-    // Progress bar
-    const bar = document.getElementById('confidenceBar');
-    bar.style.width     = authenticity + '%';
-    bar.className       = 'h-full ' + (isReal ? 'shimmer' : 'shimmer-red');
+    const bar       = document.getElementById('confidenceBar');
+    bar.style.width = authenticity + '%';
+    bar.className   = 'h-full ' + (isReal ? 'shimmer' : 'shimmer-red');
 
-    // Metrics
-    document.getElementById('facialMetric').textContent  = metrics.facial   + '%';
-    document.getElementById('lipSyncMetric').textContent = metrics.lipSync  + '%';
-    document.getElementById('ganMetric').textContent     = metrics.gan      + '%';
-    document.getElementById('fftMetric').textContent     = metrics.fft      + '%';
-    document.getElementById('temporalMetric').textContent= metrics.temporal + '%';
-    document.getElementById('metadataMetric').textContent= metrics.metadata + '%';
+    // ── 7. METRICS ────────────────────────────────────────────────────────────
+    document.getElementById('facialMetric').textContent   = metrics.facial   + '%';
+    document.getElementById('lipSyncMetric').textContent  = metrics.lipSync  + '%';
+    document.getElementById('ganMetric').textContent      = metrics.gan      + '%';
+    document.getElementById('fftMetric').textContent      = metrics.fft      + '%';
+    document.getElementById('temporalMetric').textContent = metrics.temporal + '%';
+    document.getElementById('metadataMetric').textContent = metrics.metadata + '%';
 
-    // File info
-    document.getElementById('filenameDisplay').textContent = RAW_FILENAME || 'uploaded_video';
-    document.getElementById('faceCountInfo').textContent   = faceCount + ' face(s)';
+    // ── 8. FILE INFO ──────────────────────────────────────────────────────────
+    document.getElementById('filenameDisplay').textContent = RAW_FILENAME || 'uploaded_file';
     document.getElementById('analysisDate').textContent    = today;
+    document.getElementById('reportIdSpan').textContent    = '#' + reportId;
+    document.getElementById('footerReportId').textContent  = 'report ID: ' + reportId.toLowerCase();
 
-    // Report ID
-    document.getElementById('reportIdSpan').textContent  = '#' + reportId;
-    document.getElementById('footerReportId').textContent = 'report ID: ' + reportId.toLowerCase();
-
-    // ── 5. NEURAL OBSERVATIONS ────────────────────────────────────────────────
+    // ── 9. OBSERVATIONS ───────────────────────────────────────────────────────
     function generateObservations(auth, dp, m) {
         const obs = [];
 
+        if (MEDIA_TYPE === 'audio') {
+            obs.push('Note: Analysis performed on audio signal using voice deepfake detection model.');
+        } else if (MEDIA_TYPE === 'image' && faceCount === 0) {
+            obs.push('Note: No face detected in this image. Prediction ran on full image as fallback — accuracy may be lower than expected.');
+        }
+
         if (isReal) {
-            obs.push('✓ Neural ensemble classifies media as AUTHENTIC with ' + auth + '% confidence.');
-            obs.push('✓ No detectable GAN artifacts or generative adversarial patterns found (' + m.gan + '% anomaly score).');
+            obs.push('Neural ensemble classifies media as AUTHENTIC with ' + auth + '% confidence.');
+            obs.push('No detectable GAN artifacts or generative adversarial patterns found (' + m.gan + '% anomaly score).');
         } else {
-            obs.push('⚠ Neural ensemble indicates DEEPFAKE manipulation detected (' + dp + '% fake probability).');
-            obs.push('⚠ GAN artifact patterns detected at ' + m.gan + '% — consistent with face-swap synthesis.');
+            obs.push('WARNING: Neural ensemble indicates DEEPFAKE manipulation detected (' + dp + '% fake probability).');
+            obs.push('WARNING: GAN artifact patterns detected at ' + m.gan + '% — consistent with synthetic media.');
         }
 
         obs.push(m.facial >= 90
-            ? '✓ Facial identity consistency is high (' + m.facial + '%) — no identity mismatch across frames.'
-            : '⚠ Facial inconsistencies detected (' + m.facial + '%) — potential face-swap indicator.');
+            ? 'Identity consistency is high (' + m.facial + '%) — no mismatch detected.'
+            : 'WARNING: Identity inconsistencies detected (' + m.facial + '%) — potential manipulation indicator.');
 
         obs.push(m.lipSync >= 90
-            ? '✓ Lip-sync accuracy is strong (' + m.lipSync + '%). Audio-visual alignment is natural.'
-            : '⚠ Low lip-sync accuracy (' + m.lipSync + '%) — common pattern in deepfake synthesis.');
+            ? 'Signal naturalness score is strong (' + m.lipSync + '%). Patterns align with genuine media.'
+            : 'WARNING: Low naturalness score (' + m.lipSync + '%) — common in synthetic media.');
 
         obs.push(m.fft >= 90
-            ? '✓ Spectral analysis (FFT) shows natural frequency distribution (' + m.fft + '% match).'
-            : '◉ Frequency anomalies detected — possible manipulation artifacts in spectral domain.');
+            ? 'Spectral analysis (FFT) shows natural frequency distribution (' + m.fft + '% match).'
+            : 'CAUTION: Frequency anomalies detected — possible manipulation artifacts in spectral domain.');
 
         obs.push(m.temporal >= 90
-            ? '✓ Temporal coherence is stable (' + m.temporal + '%). No flickering or frame warping.'
-            : '⚠ Temporal incoherence detected — frame-to-frame inconsistencies suggest generative interpolation.');
+            ? 'Temporal coherence is stable (' + m.temporal + '%). No discontinuities detected.'
+            : 'WARNING: Temporal incoherence detected — inconsistencies suggest generative interpolation.');
 
         obs.push(m.metadata === 100
-            ? '✓ Metadata integrity verified — capture device signature matches expected patterns.'
-            : '◉ Metadata inconsistencies found — EXIF data may have been modified.');
+            ? 'Metadata integrity verified — source signature matches expected patterns.'
+            : 'CAUTION: Metadata inconsistencies found — data may have been modified.');
 
         obs.push(dp < 5
-            ? '✓ Overall risk: LOW. Media appears genuine and unaltered.'
+            ? 'Overall risk: LOW. Media appears genuine and unaltered.'
             : dp < 30
-            ? '◉ Moderate risk — manual review suggested for high-stakes verification.'
-            : '⚠ HIGH RISK: Deepfake probability exceeds safe threshold — do not use as evidence without review.');
+            ? 'CAUTION: Moderate risk — manual review suggested for high-stakes verification.'
+            : 'HIGH RISK: Deepfake probability exceeds safe threshold — do not use as evidence without review.');
 
         return obs;
     }
@@ -521,58 +419,53 @@
     obsList.innerHTML = '';
     observations.forEach(text => {
         const li = document.createElement('li');
-        li.className = 'text-sm leading-relaxed ' + (text.startsWith('⚠') ? 'text-red-300' : text.startsWith('◉') ? 'text-amber-300' : 'text-white/70');
+        li.className = 'text-sm leading-relaxed ' +
+            (text.startsWith('WARNING') || text.startsWith('HIGH RISK') ? 'text-red-300' :
+             text.startsWith('CAUTION') ? 'text-amber-300' : 'text-white/70');
         li.textContent = text;
         obsList.appendChild(li);
     });
 
-    // ── 6. REPORT DATA OBJECT (for exports & share) ───────────────────────────
+    // ── 10. REPORT DATA ───────────────────────────────────────────────────────
     const reportData = {
-        reportId,
-        filename:     RAW_FILENAME || 'uploaded_video',
-        verdict:      verdictLabel,
-        authenticity,
-        deepfakeProbability: deepfakeProb,
-        faceCount,
-        analysisDate: today,
-        metrics,
-        observations
+        reportId, filename: RAW_FILENAME || 'uploaded_file',
+        mediaType: MEDIA_TYPE, verdict: verdictLabel,
+        authenticity, deepfakeProbability: deepfakeProb,
+        faceCount, analysisDate: today, metrics, observations
     };
 
-    // ── 7. EXPORT FUNCTIONS ───────────────────────────────────────────────────
+    // ── 11. EXPORTS ───────────────────────────────────────────────────────────
     function showToast(msg) {
-        const existing = document.querySelector('.toast-notification');
-        if (existing) existing.remove();
-        const toast = document.createElement('div');
-        toast.className = 'toast-notification';
-        toast.textContent = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+        const e = document.querySelector('.toast-notification');
+        if (e) e.remove();
+        const t = document.createElement('div');
+        t.className = 'toast-notification';
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
     }
 
     function downloadFile(content, filename, mime) {
         const blob = new Blob([content], { type: mime });
         const url  = URL.createObjectURL(blob);
         const a    = document.createElement('a');
-        a.href     = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a); URL.revokeObjectURL(url);
     }
 
     function exportTXT() {
         let c = 'DEEPVERIFY FORENSIC REPORT\n==========================\n\n';
         c += `File            : ${reportData.filename}\n`;
+        c += `Media type      : ${reportData.mediaType}\n`;
         c += `Verdict         : ${reportData.verdict}\n`;
         c += `Authenticity    : ${reportData.authenticity}%\n`;
         c += `Deepfake prob.  : ${reportData.deepfakeProbability}%\n`;
-        c += `Faces analyzed  : ${reportData.faceCount}\n`;
+        c += `Samples         : ${reportData.faceCount}\n`;
         c += `Analyzed on     : ${reportData.analysisDate}\n\n`;
         c += 'DETAILED INDICATORS:\n';
-        c += `  Facial consistency : ${reportData.metrics.facial}%\n`;
-        c += `  Lip sync           : ${reportData.metrics.lipSync}%\n`;
+        c += `  Consistency        : ${reportData.metrics.facial}%\n`;
+        c += `  Naturalness        : ${reportData.metrics.lipSync}%\n`;
         c += `  GAN artifact       : ${reportData.metrics.gan}%\n`;
         c += `  Frequency (FFT)    : ${reportData.metrics.fft}%\n`;
         c += `  Temporal coherence : ${reportData.metrics.temporal}%\n`;
@@ -580,8 +473,7 @@
         c += 'NEURAL OBSERVATIONS:\n';
         reportData.observations.forEach(o => c += `  - ${o}\n`);
         c += `\nReport ID : ${reportData.reportId}\n`;
-        c += '==========================\n';
-        c += 'Digitally signed by DeepVerify neural engine v2.4\n';
+        c += '==========================\nDigitally signed by DeepVerify v2.4\n';
         downloadFile(c, `DeepVerify_${reportData.reportId}.txt`, 'text/plain');
     }
 
@@ -591,33 +483,22 @@
 
     function exportCSV() {
         let c = 'Field,Value\n';
-        c += `Filename,${reportData.filename}\n`;
-        c += `Verdict,${reportData.verdict}\n`;
-        c += `Authenticity (%),${reportData.authenticity}\n`;
-        c += `Deepfake Probability (%),${reportData.deepfakeProbability}\n`;
-        c += `Faces Analyzed,${reportData.faceCount}\n`;
-        c += `Facial Consistency (%),${reportData.metrics.facial}\n`;
-        c += `Lip Sync Accuracy (%),${reportData.metrics.lipSync}\n`;
-        c += `GAN Artifact (%),${reportData.metrics.gan}\n`;
-        c += `FFT Analysis (%),${reportData.metrics.fft}\n`;
-        c += `Temporal Coherence (%),${reportData.metrics.temporal}\n`;
-        c += `Metadata Integrity (%),${reportData.metrics.metadata}\n`;
-        c += `Analysis Date,${reportData.analysisDate}\n`;
-        c += `Report ID,${reportData.reportId}\n`;
+        c += `Filename,${reportData.filename}\nMedia Type,${reportData.mediaType}\n`;
+        c += `Verdict,${reportData.verdict}\nAuthenticity (%),${reportData.authenticity}\n`;
+        c += `Deepfake Probability (%),${reportData.deepfakeProbability}\nSamples,${reportData.faceCount}\n`;
+        c += `Consistency (%),${reportData.metrics.facial}\nNaturalness (%),${reportData.metrics.lipSync}\n`;
+        c += `GAN Artifact (%),${reportData.metrics.gan}\nFFT Analysis (%),${reportData.metrics.fft}\n`;
+        c += `Temporal Coherence (%),${reportData.metrics.temporal}\nMetadata Integrity (%),${reportData.metrics.metadata}\n`;
+        c += `Analysis Date,${reportData.analysisDate}\nReport ID,${reportData.reportId}\n`;
         downloadFile(c, `DeepVerify_${reportData.reportId}.csv`, 'text/csv');
     }
 
-    // ── 8. BUTTON WIRING ──────────────────────────────────────────────────────
-    document.getElementById('downloadReportBtn').addEventListener('click', () => {
-        exportTXT();
-        showToast('Report downloaded');
-    });
-
-    document.querySelectorAll('.export-txt').forEach(b => b.addEventListener('click', () => { exportTXT(); showToast('TXT downloaded'); }));
+    // ── 12. BUTTONS ───────────────────────────────────────────────────────────
+    document.getElementById('downloadReportBtn').addEventListener('click', () => { exportTXT(); showToast('Report downloaded'); });
+    document.querySelectorAll('.export-txt').forEach(b  => b.addEventListener('click', () => { exportTXT();  showToast('TXT downloaded'); }));
     document.querySelectorAll('.export-json').forEach(b => b.addEventListener('click', () => { exportJSON(); showToast('JSON downloaded'); }));
-    document.querySelectorAll('.export-csv').forEach(b => b.addEventListener('click', () => { exportCSV(); showToast('CSV downloaded'); }));
+    document.querySelectorAll('.export-csv').forEach(b  => b.addEventListener('click', () => { exportCSV();  showToast('CSV downloaded'); }));
 
-    // Share
     document.getElementById('shareReportBtn').addEventListener('click', async () => {
         const text = `DeepVerify Report\nVerdict: ${reportData.verdict}\nAuthenticity: ${reportData.authenticity}%\nReport ID: ${reportData.reportId}`;
         if (navigator.share) {

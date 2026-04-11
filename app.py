@@ -27,11 +27,17 @@ os.makedirs(FRAMES_BASE,   exist_ok=True)
 os.makedirs(FACES_BASE,    exist_ok=True)
 
 # ---------- Scripts ----------
-FRAME_EXTRACTOR = os.path.join(BASE_DIR, 'processing', '00-convert_video_to_image.py')
-FACE_CROPPER    = os.path.join(BASE_DIR, 'processing', '01b-crop_faces_from_frames.py')
-PREDICTOR       = os.path.join(BASE_DIR, 'processing', '05-predict_faces.py')
 
-ALLOWED_EXTENSIONS = {'mp4', 'mov', 'webm', 'avi', 'mkv'}
+FRAME_EXTRACTOR          = os.path.join(BASE_DIR, 'processing', '00-convert_video_to_image.py')
+FACE_CROPPER             = os.path.join(BASE_DIR, 'processing', '01b-crop_faces_from_frames.py')
+PREDICTOR                = os.path.join(BASE_DIR, 'processing', '05-predict_faces.py')
+IMAGE_PREDICTOR          = os.path.join(BASE_DIR, 'processing', '06-predict_image.py')
+AUDIO_PREDICTOR          = os.path.join(BASE_DIR, 'processing', '07-predict_audio.py')
+
+# ---------- Allowed extensions ----------
+ALLOWED_VIDEO_EXTENSIONS = {'mp4', 'mov', 'webm', 'avi', 'mkv'}
+ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'bmp'}
+ALLOWED_AUDIO_EXTENSIONS = {'wav', 'mp3', 'flac', 'ogg', 'm4a'}
 
 # ---------- Helper ----------
 def run_script(script, args, timeout=180):
@@ -51,12 +57,19 @@ def run_script(script, args, timeout=180):
     except Exception as e:
         return False, "", str(e)
 
-# ---------- Upload & predict endpoint ----------
+def save_session(authenticity, face_count, verdict, filename, media_type):
+    """Save result to Flask session."""
+    session['authenticity'] = authenticity
+    session['face_count']   = face_count
+    session['verdict']      = verdict
+    session['filename']     = filename
+    session['media_type']   = media_type  # 'video', 'image', 'audio'
+
+# ---------- VIDEO upload & predict endpoint ----------
 @app.route("/upload_video", methods=['POST'])
 def upload_video():
-    print("=== UPLOAD ENDPOINT HIT ===")
+    print("=== VIDEO UPLOAD ENDPOINT HIT ===")
 
-    # ── Validate file ─────────────────────────────────────────────────────────
     if 'file' not in request.files:
         return jsonify({'success': False, 'error': 'No file part'}), 400
 
@@ -65,10 +78,9 @@ def upload_video():
         return jsonify({'success': False, 'error': 'No selected file'}), 400
 
     ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
-    if ext not in ALLOWED_EXTENSIONS:
+    if ext not in ALLOWED_VIDEO_EXTENSIONS:
         return jsonify({'success': False, 'error': f'Invalid file type: {ext}'}), 400
 
-    # ── Save uploaded video ───────────────────────────────────────────────────
     unique_id     = uuid.uuid4().hex
     safe_filename = f"{unique_id}.{ext}"
     video_path    = os.path.join(UPLOAD_FOLDER, safe_filename)
@@ -78,11 +90,10 @@ def upload_video():
     frames_dir = os.path.join(FRAMES_BASE, unique_id)
     faces_dir  = os.path.join(FACES_BASE,  unique_id)
 
-    # ── Step 1: Extract frames ────────────────────────────────────────────────
+    # Step 1: Extract frames
     print("Extracting frames...")
     ok, out, err = run_script(FRAME_EXTRACTOR, [video_path, FRAMES_BASE], timeout=180)
     if not ok:
-        print(f"Frame extraction failed: {err}")
         return jsonify({'success': False, 'error': f'Frame extraction failed: {err}'}), 500
 
     if not os.path.exists(frames_dir) or not os.listdir(frames_dir):
@@ -90,7 +101,7 @@ def upload_video():
 
     print(f"Frames saved to: {frames_dir}")
 
-    # ── Step 2: Crop faces ────────────────────────────────────────────────────
+    # Step 2: Crop faces
     print("Detecting and cropping faces...")
     ok, out, err = run_script(FACE_CROPPER, [frames_dir, faces_dir], timeout=180)
     if not ok:
@@ -103,52 +114,42 @@ def upload_video():
     print(f"{face_count} face(s) detected")
 
     if face_count == 0:
-        session['authenticity'] = None
-        session['face_count']   = 0
-        session['verdict']      = None
-        session['filename']     = safe_filename
+        save_session(None, 0, None, safe_filename, 'video')
         return jsonify({
-            'success': True,
-            'message': 'Frames extracted but no faces were detected in the video.',
-            'face_count': 0,
+            'success':      True,
+            'message':      'Frames extracted but no faces were detected in the video.',
+            'face_count':   0,
             'authenticity': None,
-            'verdict': None,
-            'redirect': '/report'
+            'verdict':      None,
+            'redirect':     '/report'
         })
 
-    # ── Step 3: ZIP faces ─────────────────────────────────────────────────────
+    # Step 3: ZIP faces
     zip_path = os.path.join(UPLOAD_FOLDER, f"{unique_id}_faces.zip")
     with zipfile.ZipFile(zip_path, 'w') as zf:
         for f in face_files:
             zf.write(os.path.join(faces_dir, f), arcname=f)
 
-    # ── Step 4: Deepfake prediction ───────────────────────────────────────────
+    # Step 4: Predict
     print("Running deepfake prediction...")
     ok, out, err = run_script(PREDICTOR, [faces_dir, MODEL_PATH], timeout=180)
     print("Predictor stdout:", out)
     if err:
         print("Predictor stderr:", err[:300])
 
-    # Parse authenticity
     authenticity = None
     verdict      = None
 
     match = re.search(r'Authenticity\s*:\s*([\d.]+)%', out)
     if match:
         authenticity = round(float(match.group(1)), 2)
-        verdict = 'Likely REAL' if authenticity >= 50 else 'Likely FAKE'
+        verdict      = 'Likely REAL' if authenticity >= 50 else 'Likely FAKE'
         print(f"Authenticity: {authenticity}% -- {verdict}")
     else:
-        print("Could not parse authenticity from predictor output")
-        print("Full stdout was:", out)
+        print("Could not parse authenticity. Full stdout:", out)
 
-    # ── Save to session ───────────────────────────────────────────────────────
-    session['authenticity'] = authenticity
-    session['face_count']   = face_count
-    session['verdict']      = verdict
-    session['filename']     = safe_filename
+    save_session(authenticity, face_count, verdict, safe_filename, 'video')
 
-    # ── Response ──────────────────────────────────────────────────────────────
     return jsonify({
         'success':      True,
         'message':      f'Processed {face_count} face(s) from uploaded video.',
@@ -156,6 +157,118 @@ def upload_video():
         'authenticity': authenticity,
         'verdict':      verdict,
         'faces_zip':    zip_path if os.path.exists(zip_path) else None,
+        'redirect':     '/report'
+    })
+
+
+# ---------- IMAGE upload & predict endpoint ----------
+@app.route("/upload_image", methods=['POST'])
+def upload_image():
+    print("=== IMAGE UPLOAD ENDPOINT HIT ===")
+
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'error': 'No file part'}), 400
+
+    file = request.files['file']
+    if not file or file.filename == '':
+        return jsonify({'success': False, 'error': 'No selected file'}), 400
+
+    ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
+        return jsonify({'success': False, 'error': f'Invalid file type: {ext}'}), 400
+
+    unique_id     = uuid.uuid4().hex
+    safe_filename = f"{unique_id}.{ext}"
+    image_path    = os.path.join(UPLOAD_FOLDER, safe_filename)
+    file.save(image_path)
+    print(f"Image saved: {image_path}")
+
+    print("Running image deepfake prediction...")
+    ok, out, err = run_script(IMAGE_PREDICTOR, [image_path, MODEL_PATH], timeout=120)
+    print("Predictor stdout:", out)
+    if err:
+        print("Predictor stderr:", err[:300])
+
+    authenticity = None
+    verdict      = None
+    face_count   = 0
+
+    auth_match    = re.search(r'Authenticity\s*:\s*([\d.]+)%', out)
+    verdict_match = re.search(r'Verdict\s*:\s*(Likely REAL|Likely FAKE)', out)
+    face_match    = re.search(r'Faces processed\s*:\s*(\d+)', out)
+    no_face       = 'No face detected' in out
+
+    if auth_match:
+        authenticity = round(float(auth_match.group(1)), 2)
+    if verdict_match:
+        verdict = verdict_match.group(1)
+    if face_match:
+        face_count = int(face_match.group(1))
+    if no_face:
+        face_count = 0  # override — no real face found
+
+    save_session(authenticity, face_count, verdict, safe_filename, 'image')
+
+    return jsonify({
+        'success':      True,
+        'authenticity': authenticity,
+        'verdict':      verdict,
+        'face_count':   face_count,
+        'redirect':     '/report'
+    })
+
+
+# ---------- AUDIO upload & predict endpoint ----------
+@app.route("/upload_audio", methods=['POST'])
+def upload_audio():
+    print("=== AUDIO UPLOAD ENDPOINT HIT ===")
+
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'error': 'No file part'}), 400
+
+    file = request.files['file']
+    if not file or file.filename == '':
+        return jsonify({'success': False, 'error': 'No selected file'}), 400
+
+    ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
+    if ext not in ALLOWED_AUDIO_EXTENSIONS:
+        return jsonify({'success': False, 'error': f'Invalid file type: {ext}'}), 400
+
+    unique_id     = uuid.uuid4().hex
+    safe_filename = f"{unique_id}.{ext}"
+    audio_path    = os.path.join(UPLOAD_FOLDER, safe_filename)
+    file.save(audio_path)
+    print(f"Audio saved: {audio_path}")
+
+    print("Running audio deepfake prediction...")
+    ok, out, err = run_script(AUDIO_PREDICTOR, [audio_path], timeout=300)
+    print("Predictor stdout:", out)
+    if err:
+        print("Predictor stderr:", err[:300])
+
+    authenticity  = None
+    verdict       = None
+    duration      = None
+
+    auth_match     = re.search(r'Authenticity\s*:\s*([\d.]+)%', out)
+    verdict_match  = re.search(r'Verdict\s*:\s*(Likely REAL|Likely FAKE)', out)
+    duration_match = re.search(r'Duration\s*:\s*([\d.]+)s', out)
+
+    if auth_match:
+        authenticity = round(float(auth_match.group(1)), 2)
+    if verdict_match:
+        verdict = verdict_match.group(1)
+    if duration_match:
+        duration = float(duration_match.group(1))
+
+    # face_count = 0 for audio (no faces, it's an audio clip)
+    save_session(authenticity, 0, verdict, safe_filename, 'audio')
+
+    return jsonify({
+        'success':      True,
+        'authenticity': authenticity,
+        'verdict':      verdict,
+        'duration':     duration,
         'redirect':     '/report'
     })
 
@@ -187,7 +300,8 @@ def report():
         authenticity = session.get('authenticity'),
         face_count   = session.get('face_count'),
         verdict      = session.get('verdict'),
-        filename     = session.get('filename')
+        filename     = session.get('filename'),
+        media_type   = session.get('media_type', 'video')
     )
 
 @app.route("/upload")
