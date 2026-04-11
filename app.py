@@ -1,120 +1,203 @@
-import os
-from flask import Blueprint, Flask, current_app, render_template, request
+﻿import os
+import subprocess
+import sys
+import uuid
+import zipfile
+import re
+import secrets
+from flask import Flask, render_template, request, jsonify, session
+from werkzeug.utils import secure_filename
 
-from app import create_app
-#from app.processing.video_processor import process_video    # pyright: ignore[reportMissingImports]
-
-app = Flask(__name__, 
+# ---------- Flask app initialization ----------
+app = Flask(__name__,
             template_folder="app/templates",
-            static_folder="app/static",
-)
+            static_folder="app/static")
 
-app = create_app()
+app.secret_key = secrets.token_hex(16)
 
-# Home page
+# ---------- Path configuration ----------
+BASE_DIR      = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+FRAMES_BASE   = os.path.join(BASE_DIR, 'frames')
+FACES_BASE    = os.path.join(BASE_DIR, 'faces')
+MODEL_PATH    = os.path.join(BASE_DIR, 'tmp_checkpoint', 'best_model.keras')
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(FRAMES_BASE,   exist_ok=True)
+os.makedirs(FACES_BASE,    exist_ok=True)
+
+# ---------- Scripts ----------
+FRAME_EXTRACTOR = os.path.join(BASE_DIR, 'processing', '00-convert_video_to_image.py')
+FACE_CROPPER    = os.path.join(BASE_DIR, 'processing', '01b-crop_faces_from_frames.py')
+PREDICTOR       = os.path.join(BASE_DIR, 'processing', '05-predict_faces.py')
+
+ALLOWED_EXTENSIONS = {'mp4', 'mov', 'webm', 'avi', 'mkv'}
+
+# ---------- Helper ----------
+def run_script(script, args, timeout=180):
+    """Run a python script, return (success, stdout, stderr)."""
+    try:
+        result = subprocess.run(
+            [sys.executable, script] + args,
+            capture_output=True,
+            text=True,
+            encoding='utf-8',
+            errors='replace',
+            timeout=timeout
+        )
+        return result.returncode == 0, result.stdout, result.stderr
+    except subprocess.TimeoutExpired:
+        return False, "", "Script timed out"
+    except Exception as e:
+        return False, "", str(e)
+
+# ---------- Upload & predict endpoint ----------
+@app.route("/upload_video", methods=['POST'])
+def upload_video():
+    print("=== UPLOAD ENDPOINT HIT ===")
+
+    # ── Validate file ─────────────────────────────────────────────────────────
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'error': 'No file part'}), 400
+
+    file = request.files['file']
+    if not file or file.filename == '':
+        return jsonify({'success': False, 'error': 'No selected file'}), 400
+
+    ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
+    if ext not in ALLOWED_EXTENSIONS:
+        return jsonify({'success': False, 'error': f'Invalid file type: {ext}'}), 400
+
+    # ── Save uploaded video ───────────────────────────────────────────────────
+    unique_id     = uuid.uuid4().hex
+    safe_filename = f"{unique_id}.{ext}"
+    video_path    = os.path.join(UPLOAD_FOLDER, safe_filename)
+    file.save(video_path)
+    print(f"Video saved: {video_path}")
+
+    frames_dir = os.path.join(FRAMES_BASE, unique_id)
+    faces_dir  = os.path.join(FACES_BASE,  unique_id)
+
+    # ── Step 1: Extract frames ────────────────────────────────────────────────
+    print("Extracting frames...")
+    ok, out, err = run_script(FRAME_EXTRACTOR, [video_path, FRAMES_BASE], timeout=180)
+    if not ok:
+        print(f"Frame extraction failed: {err}")
+        return jsonify({'success': False, 'error': f'Frame extraction failed: {err}'}), 500
+
+    if not os.path.exists(frames_dir) or not os.listdir(frames_dir):
+        return jsonify({'success': False, 'error': 'No frames were extracted from the video'}), 500
+
+    print(f"Frames saved to: {frames_dir}")
+
+    # ── Step 2: Crop faces ────────────────────────────────────────────────────
+    print("Detecting and cropping faces...")
+    ok, out, err = run_script(FACE_CROPPER, [frames_dir, faces_dir], timeout=180)
+    if not ok:
+        print(f"Face cropping warning: {err}")
+
+    face_files = []
+    if os.path.exists(faces_dir):
+        face_files = [f for f in os.listdir(faces_dir) if f.lower().endswith('.png')]
+    face_count = len(face_files)
+    print(f"{face_count} face(s) detected")
+
+    if face_count == 0:
+        session['authenticity'] = None
+        session['face_count']   = 0
+        session['verdict']      = None
+        session['filename']     = safe_filename
+        return jsonify({
+            'success': True,
+            'message': 'Frames extracted but no faces were detected in the video.',
+            'face_count': 0,
+            'authenticity': None,
+            'verdict': None,
+            'redirect': '/report'
+        })
+
+    # ── Step 3: ZIP faces ─────────────────────────────────────────────────────
+    zip_path = os.path.join(UPLOAD_FOLDER, f"{unique_id}_faces.zip")
+    with zipfile.ZipFile(zip_path, 'w') as zf:
+        for f in face_files:
+            zf.write(os.path.join(faces_dir, f), arcname=f)
+
+    # ── Step 4: Deepfake prediction ───────────────────────────────────────────
+    print("Running deepfake prediction...")
+    ok, out, err = run_script(PREDICTOR, [faces_dir, MODEL_PATH], timeout=180)
+    print("Predictor stdout:", out)
+    if err:
+        print("Predictor stderr:", err[:300])
+
+    # Parse authenticity
+    authenticity = None
+    verdict      = None
+
+    match = re.search(r'Authenticity\s*:\s*([\d.]+)%', out)
+    if match:
+        authenticity = round(float(match.group(1)), 2)
+        verdict = 'Likely REAL' if authenticity >= 50 else 'Likely FAKE'
+        print(f"Authenticity: {authenticity}% -- {verdict}")
+    else:
+        print("Could not parse authenticity from predictor output")
+        print("Full stdout was:", out)
+
+    # ── Save to session ───────────────────────────────────────────────────────
+    session['authenticity'] = authenticity
+    session['face_count']   = face_count
+    session['verdict']      = verdict
+    session['filename']     = safe_filename
+
+    # ── Response ──────────────────────────────────────────────────────────────
+    return jsonify({
+        'success':      True,
+        'message':      f'Processed {face_count} face(s) from uploaded video.',
+        'face_count':   face_count,
+        'authenticity': authenticity,
+        'verdict':      verdict,
+        'faces_zip':    zip_path if os.path.exists(zip_path) else None,
+        'redirect':     '/report'
+    })
+
+
+# ---------- Page Routes ----------
 @app.route("/")
 def home():
     return render_template("index.html")
 
-# Login page
 @app.route("/login")
 def login():
     return render_template("login.html")
 
-# Auth page 
 @app.route("/auth")
 def auth():
     return render_template("auth.html")
 
-# How it works page
 @app.route("/howitworks")
 def how():
     return render_template("howitworks.html")
 
-#profile page
 @app.route("/profile")
 def profile():
     return render_template("profile.html")
 
-#report page
 @app.route("/report")
 def report():
-    return render_template("report.html")
+    return render_template("report.html",
+        authenticity = session.get('authenticity'),
+        face_count   = session.get('face_count'),
+        verdict      = session.get('verdict'),
+        filename     = session.get('filename')
+    )
 
-#upload page
 @app.route("/upload")
 def upload():
     return render_template("upload.html")
-
 
 @app.route("/index")
 def index():
     return render_template("index.html")
 
 
-# main = Blueprint('main', __name__)
-
-# # Configuration for allowed extensions
-# ALLOWED_EXTENSIONS = {'mp4', 'mov', 'webm', 'avi'}
-
-# def allowed_file(filename):
-#     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-# # Existing routes...
-# @main.route('/')
-# def index():
-#     return render_template('upload.html')   # or whatever your home page is
-
-# def jsonify(*args, **kwargs):
-#     raise NotImplementedError
-
-# def secure_filename(filename):
-#     raise NotImplementedError
-
-# # New route for video upload
-# @main.route('/upload_video', methods=['POST'])
-# def upload_video():
-#     # Check if a file was uploaded
-#     if 'file' not in request.files:
-#         return jsonify({'error': 'No file part'}), 400
-
-#     file = request.files['file']
-#     if file.filename == '':
-#         return jsonify({'error': 'No selected file'}), 400
-
-#     if not allowed_file(file.filename):
-#         return jsonify({'error': 'File type not allowed'}), 400
-
-#     # Save temporarily
-#     filename = secure_filename(file.filename)
-#     temp_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-#     file.save(temp_path)
-
-#     # Create a unique output folder for frames
-#     from datetime import datetime
-#     output_folder = os.path.join(
-#         current_app.config['FRAMES_FOLDER'],
-#         datetime.now().strftime('%Y%m%d_%H%M%S') + '_' + os.path.splitext(filename)[0]
-#     )
-
-#     try:
-#         # Call your video processing function
-#         result_folder = process_video(temp_path, output_folder)
-
-#         # Count extracted frames
-#         frame_count = len([f for f in os.listdir(result_folder) if f.endswith('.png')])
-
-#         # Optional: delete the original uploaded video to save space
-#         # os.remove(temp_path)
-
-#         return jsonify({
-#             'success': True,
-#             'message': f'Video processed. Extracted {frame_count} frames.',
-#             'frames_folder': result_folder
-#         }), 200
-
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5000)

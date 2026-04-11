@@ -1,57 +1,80 @@
-import json
+import sys
 import os
 import cv2
 import math
 
-base_path = '.\\train_sample_videos\\'
-
 def get_filename_only(file_path):
-    file_basename = os.path.basename(file_path)
-    filename_only = file_basename.split('.')[0]
-    return filename_only
+    return os.path.splitext(os.path.basename(file_path))[0]
 
-with open(os.path.join(base_path, 'metadata.json')) as metadata_json:
-    metadata = json.load(metadata_json)
-    print(len(metadata))
+def process_video(video_path, frames_base_path):
+    """Convert a single video to frames."""
+    if not os.path.exists(video_path):
+        print(f"Error: Video file not found: {video_path}")
+        return False
 
-for filename in metadata.keys():
-    print(filename)
-    if (filename.endswith(".mp4")):
-        tmp_path = os.path.join(base_path, get_filename_only(filename))
-        print('Creating Directory: ' + tmp_path)
-        os.makedirs(tmp_path, exist_ok=True)
-        print('Converting Video to Images...')
-        count = 0
-        video_file = os.path.join(base_path, filename)
-        cap = cv2.VideoCapture(video_file)
-        frame_rate = cap.get(5) #frame rate
-        while(cap.isOpened()):
-            frame_id = cap.get(1) #current frame number
-            ret, frame = cap.read()
-            if (ret != True):
-                break
-            if (frame_id % math.floor(frame_rate) == 0):
-                print('Original Dimensions: ', frame.shape)
-                if frame.shape[1] < 300:
-                    scale_ratio = 2
-                elif frame.shape[1] > 1900:
-                    scale_ratio = 0.33
-                elif frame.shape[1] > 1000 and frame.shape[1] <= 1900 :
-                    scale_ratio = 0.5
-                else:
-                    scale_ratio = 1
-                print('Scale Ratio: ', scale_ratio)
+    # Normalize and ensure the output base path exists
+    frames_base_path = os.path.abspath(frames_base_path)
+    if not frames_base_path:
+        print("Error: No frames output directory provided.")
+        return False
 
-                width = int(frame.shape[1] * scale_ratio)
-                height = int(frame.shape[0] * scale_ratio)
-                dim = (width, height)
-                new_frame = cv2.resize(frame, dim, interpolation = cv2.INTER_AREA)
-                print('Resized Dimensions: ', new_frame.shape)
+    os.makedirs(frames_base_path, exist_ok=True)
 
-                new_filename = '{}-{:03d}.png'.format(os.path.join(tmp_path, get_filename_only(filename)), count)
-                count = count + 1
-                cv2.imwrite(new_filename, new_frame)
-        cap.release()
-        print("Done!")
-    else:
-        continue
+    # Create frames subfolder named after the video
+    video_name = get_filename_only(video_path)
+    if not video_name:
+        print(f"Error: Unable to determine video name from path: {video_path}")
+        return False
+
+    output_dir = os.path.join(frames_base_path, video_name)
+    os.makedirs(output_dir, exist_ok=True)
+    print(f"Creating directory: {output_dir}")
+
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        print(f"Error: Cannot open video {video_path}")
+        return False
+
+    frame_rate = cap.get(cv2.CAP_PROP_FPS)
+    count = 0
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        frame_id = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
+        if frame_id % max(1, math.floor(frame_rate)) == 0:
+            # Resize logic (same as yours)
+            h, w = frame.shape[:2]
+            if w < 300:
+                scale = 2
+            elif w > 1900:
+                scale = 0.33
+            elif 1000 < w <= 1900:
+                scale = 0.5
+            else:
+                scale = 1
+
+            new_w = int(w * scale)
+            new_h = int(h * scale)
+            new_frame = cv2.resize(frame, (new_w, new_h), interpolation=cv2.INTER_AREA)
+
+            out_filename = f"{video_name}-{count:03d}.png"
+            cv2.imwrite(os.path.join(output_dir, out_filename), new_frame)
+            count += 1
+
+    cap.release()
+    print(f"Done: {video_path} -> {count} frames saved to {output_dir}")
+    return True
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python 00-convert_video_to_image.py <video_path> <output_frames_dir>")
+        sys.exit(1)
+
+    video_path = sys.argv[1]
+    frames_base_path = sys.argv[2]
+
+    success = process_video(video_path, frames_base_path)
+    sys.exit(0 if success else 1)
