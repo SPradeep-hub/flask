@@ -3,3 +3,5 @@ frames
 uploads
 venv
 *.pyc
+*.pyo
+*.pyd   

@@ -5,17 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeepVerify · neural forensics</title>
 
-    <!-- Tailwind (dark professional) -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Google Font: Space Grotesk + Inter fallback -->
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Material Symbols -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,1" />
 
     <style>
-        /* (Keep all your original professional styles – unchanged) */
         body {
             font-family: 'Space Grotesk', 'Inter', sans-serif;
             background-color: #0c0c14;
@@ -67,10 +61,8 @@
         .data-flow::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 60%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 60%; height: 100%;
             background: linear-gradient(90deg, transparent, rgba(45,240,255,0.15), transparent);
             animation: data-flow 3.5s infinite;
             pointer-events: none;
@@ -82,14 +74,8 @@
             border-color: #2df0ff;
             box-shadow: 0 0 15px rgba(45,240,255,0.2), 0 1px 0 #2df0ff inset, 0 -1px 0 #2df0ff inset;
         }
-        @keyframes scanMove {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(280px); }
-            100% { transform: translateY(0); }
-        }
         .wave-bar-pro {
-            width: 3px;
-            height: 22px;
+            width: 3px; height: 22px;
             background: linear-gradient(to top, #2df0ff 0%, #a0f8ff 100%);
             display: inline-block;
             margin: 0 2px;
@@ -100,15 +86,9 @@
             0%,100% { transform: scaleY(0.4); opacity: 0.4; }
             50% { transform: scaleY(1.2); opacity: 1; }
         }
-        .ring-rotate { animation: ringRotate 6s infinite linear; }
-        @keyframes ringRotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
         .dot-intelligent {
             width: 8px; height: 8px;
-            background: #2df0ff;
-            border-radius: 50%;
+            background: #2df0ff; border-radius: 50%;
             box-shadow: 0 0 10px #2df0ff;
             animation: dotPulse 1.8s infinite;
         }
@@ -138,11 +118,84 @@
         }
         .animate-spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* Processing overlay */
+        #processingOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(12, 12, 20, 0.92);
+            backdrop-filter: blur(12px);
+            z-index: 200;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+        }
+        #processingOverlay.active { display: flex; }
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.4);
+            transition: color 0.4s;
+        }
+        .step-item.done { color: #2df0ff; }
+        .step-item.active-step { color: #fff; }
+        .step-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            flex-shrink: 0;
+            transition: background 0.4s, box-shadow 0.4s;
+        }
+        .step-item.done .step-dot {
+            background: #2df0ff;
+            box-shadow: 0 0 10px #2df0ff;
+        }
+        .step-item.active-step .step-dot {
+            background: #fff;
+            box-shadow: 0 0 8px #fff;
+            animation: dotPulse 1s infinite;
+        }
     </style>
 </head>
 <body class="min-h-screen grain text-gray-200 antialiased">
 
 <div class="fixed inset-0 neural-grid opacity-20 pointer-events-none"></div>
+
+<!-- ========== PROCESSING OVERLAY ========== -->
+<div id="processingOverlay">
+    <div class="text-center mb-4">
+        <span class="material-symbols-outlined text-cyan animate-spin text-5xl">radar</span>
+        <h2 class="text-xl font-medium text-white mt-4">Analyzing video...</h2>
+        <p class="text-white/40 text-sm mt-1">Please wait, do not close this tab</p>
+    </div>
+    <div class="glass-panel rounded-2xl p-6 w-full max-w-sm space-y-4">
+        <div class="step-item" id="step1">
+            <span class="step-dot"></span>
+            <span>Uploading video</span>
+        </div>
+        <div class="step-item" id="step2">
+            <span class="step-dot"></span>
+            <span>Extracting frames</span>
+        </div>
+        <div class="step-item" id="step3">
+            <span class="step-dot"></span>
+            <span>Detecting faces</span>
+        </div>
+        <div class="step-item" id="step4">
+            <span class="step-dot"></span>
+            <span>Running deepfake prediction</span>
+        </div>
+        <div class="step-item" id="step5">
+            <span class="step-dot"></span>
+            <span>Generating report</span>
+        </div>
+    </div>
+    <p id="overlayError" class="text-red-400 text-sm hidden"></p>
+</div>
 
 <!-- ========== NAVBAR ========== -->
 <nav class="fixed top-0 left-0 w-full z-50 glass-deep border-b border-cyan/20">
@@ -199,17 +252,17 @@
             </button>
         </div>
 
-        <!-- IMAGE PANEL (dummy simulation) -->
+        <!-- IMAGE PANEL -->
         <div id="panelImage" class="tab-panel block">
             <div class="grid md:grid-cols-2 gap-8">
                 <div id="dropZoneImage" class="glass-panel rounded-2xl border-2 border-dashed border-cyan/30 p-8 text-center cursor-pointer hover:border-cyan/70 transition-all data-flow">
-                    <span class="material-symbols-outlined text-6xl text-cyan/60 group-hover:text-cyan/90 transition-all inline-block">cloud_upload</span>
+                    <span class="material-symbols-outlined text-6xl text-cyan/60 inline-block">cloud_upload</span>
                     <h3 class="text-xl font-medium mt-4">Upload image</h3>
                     <p class="text-gray-400 text-sm mt-2">PNG, JPG, WEBP · up to 50 MB</p>
                     <input type="file" id="fileInputImage" class="hidden" accept="image/png,image/jpeg,image/webp">
                     <button onclick="document.getElementById('fileInputImage').click()" class="mt-6 bg-cyan/10 border border-cyan/40 text-cyan px-8 py-2.5 rounded-full text-sm">SELECT FILE</button>
                 </div>
-                <div class="glass-panel rounded-2xl p-6 flex flex-col items-center justify-center" id="imagePreviewPanel">
+                <div class="glass-panel rounded-2xl p-6 flex flex-col items-center justify-center">
                     <div id="imagePreviewContent" class="w-full flex flex-col items-center">
                         <span class="material-symbols-outlined text-5xl text-cyan/40">image</span>
                         <p class="text-gray-400 text-sm mt-4">awaiting image</p>
@@ -219,7 +272,7 @@
             </div>
         </div>
 
-        <!-- VIDEO PANEL (real backend integration) -->
+        <!-- VIDEO PANEL -->
         <div id="panelVideo" class="tab-panel hidden">
             <div class="grid md:grid-cols-2 gap-8">
                 <div id="dropZoneVideo" class="glass-panel rounded-2xl border-2 border-dashed border-cyan/30 p-8 text-center cursor-pointer hover:border-cyan/70 transition-all data-flow">
@@ -229,7 +282,7 @@
                     <input type="file" id="fileInputVideo" class="hidden" accept="video/mp4,video/quicktime,video/webm">
                     <button onclick="document.getElementById('fileInputVideo').click()" class="mt-6 bg-cyan/10 border border-cyan/40 text-cyan px-8 py-2.5 rounded-full text-sm">SELECT FILE</button>
                 </div>
-                <div class="glass-panel rounded-2xl p-6 flex flex-col items-center justify-center" id="videoPreviewPanel">
+                <div class="glass-panel rounded-2xl p-6 flex flex-col items-center justify-center">
                     <div id="videoPreviewContent" class="w-full flex flex-col items-center">
                         <span class="material-symbols-outlined text-5xl text-cyan/40">movie</span>
                         <p class="text-gray-400 text-sm mt-4">awaiting video</p>
@@ -239,7 +292,7 @@
             </div>
         </div>
 
-        <!-- AUDIO PANEL (dummy simulation) -->
+        <!-- AUDIO PANEL -->
         <div id="panelAudio" class="tab-panel hidden">
             <div class="grid md:grid-cols-2 gap-8">
                 <div id="dropZoneAudio" class="glass-panel rounded-2xl border-2 border-dashed border-cyan/30 p-8 text-center cursor-pointer hover:border-cyan/70 transition-all data-flow">
@@ -249,7 +302,7 @@
                     <input type="file" id="fileInputAudio" class="hidden" accept="audio/wav,audio/mpeg,audio/flac">
                     <button onclick="document.getElementById('fileInputAudio').click()" class="mt-6 bg-cyan/10 border border-cyan/40 text-cyan px-8 py-2.5 rounded-full text-sm">SELECT FILE</button>
                 </div>
-                <div class="glass-panel rounded-2xl p-6 flex flex-col items-center justify-center" id="audioPreviewPanel">
+                <div class="glass-panel rounded-2xl p-6 flex flex-col items-center justify-center">
                     <div id="audioPreviewContent" class="w-full flex flex-col items-center">
                         <div class="flex items-end h-12 mb-4">
                             <div class="wave-bar-pro" style="animation-delay:0.0s"></div>
@@ -274,197 +327,220 @@
             </div>
             <div class="flex items-center gap-4">
                 <span class="material-symbols-outlined text-cyan/40 text-base">radar</span>
-                <span>DEEPFAKE INDEX <span class="text-cyan ml-1">0.00σ</span></span>
+                <span>DEEPFAKE INDEX <span class="text-cyan ml-1" id="deepfakeIndex">0.00%</span></span>
             </div>
         </div>
     </div>
 </section>
 
 <footer class="text-center text-gray-500 text-xs py-8 border-t border-cyan/10 mt-10">
-    <span class="tracking-[0.2em]">DEEPVERIFY · CONTINUOUS LEARNING · © 2026</span>
+    <span class="tracking-[0.2em]">DEEPVERIFY · CONTINUOUS LEARNING · 2026</span>
 </footer>
 
 <script>
-    (function() {
-        // ======================== TAB SWITCHING ========================
-        const tabImage = document.getElementById('tabImage');
-        const tabVideo = document.getElementById('tabVideo');
-        const tabAudio = document.getElementById('tabAudio');
-        const panelImage = document.getElementById('panelImage');
-        const panelVideo = document.getElementById('panelVideo');
-        const panelAudio = document.getElementById('panelAudio');
-        const allTabs = [tabImage, tabVideo, tabAudio];
+(function() {
 
-        function setActiveTab(active) {
-            allTabs.forEach(t => t.classList.remove('tab-active-premium', 'border-cyan', 'text-cyan'));
-            tabImage.classList.add('text-white/70');
-            tabVideo.classList.add('text-white/70');
-            tabAudio.classList.add('text-white/70');
-            if (active === 'image') {
-                tabImage.classList.add('tab-active-premium', 'border-cyan', 'text-cyan');
-                panelImage.classList.remove('hidden');
-                panelVideo.classList.add('hidden');
-                panelAudio.classList.add('hidden');
-            } else if (active === 'video') {
-                tabVideo.classList.add('tab-active-premium', 'border-cyan', 'text-cyan');
-                panelVideo.classList.remove('hidden');
-                panelImage.classList.add('hidden');
-                panelAudio.classList.add('hidden');
-            } else if (active === 'audio') {
-                tabAudio.classList.add('tab-active-premium', 'border-cyan', 'text-cyan');
-                panelAudio.classList.remove('hidden');
-                panelImage.classList.add('hidden');
-                panelVideo.classList.add('hidden');
-            }
-        }
-        tabImage.addEventListener('click', () => setActiveTab('image'));
-        tabVideo.addEventListener('click', () => setActiveTab('video'));
-        tabAudio.addEventListener('click', () => setActiveTab('audio'));
+    // ======================== TAB SWITCHING ========================
+    const tabs = {
+        image: { tab: document.getElementById('tabImage'), panel: document.getElementById('panelImage') },
+        video: { tab: document.getElementById('tabVideo'), panel: document.getElementById('panelVideo') },
+        audio: { tab: document.getElementById('tabAudio'), panel: document.getElementById('panelAudio') }
+    };
 
-        // ======================== FILE PREVIEW (all panels) ========================
-        function setupPreview(type) {
-            let dropZone, fileInput, previewDiv, scanBtn;
-            if (type === 'image') {
-                dropZone = document.getElementById('dropZoneImage');
-                fileInput = document.getElementById('fileInputImage');
-                previewDiv = document.getElementById('imagePreviewContent');
-                scanBtn = document.getElementById('scanImageBtn');
-            } else if (type === 'video') {
-                dropZone = document.getElementById('dropZoneVideo');
-                fileInput = document.getElementById('fileInputVideo');
-                previewDiv = document.getElementById('videoPreviewContent');
-                scanBtn = document.getElementById('scanVideoBtn');
-            } else {
-                dropZone = document.getElementById('dropZoneAudio');
-                fileInput = document.getElementById('fileInputAudio');
-                previewDiv = document.getElementById('audioPreviewContent');
-                scanBtn = document.getElementById('scanAudioBtn');
-            }
+    function setActiveTab(active) {
+        Object.entries(tabs).forEach(([key, { tab, panel }]) => {
+            const isActive = key === active;
+            tab.classList.toggle('tab-active-premium', isActive);
+            tab.classList.toggle('border-cyan', isActive);
+            tab.classList.toggle('text-cyan', isActive);
+            tab.classList.toggle('text-white/70', !isActive);
+            panel.classList.toggle('hidden', !isActive);
+        });
+    }
 
-            function handleFile(file) {
-                const maxSize = type === 'video' ? 200 * 1024 * 1024 : 50 * 1024 * 1024;
-                if (file.size > maxSize) {
-                    previewDiv.innerHTML = `<span class="text-red-400 text-sm">File too large</span>`;
-                    scanBtn.disabled = true;
-                    return;
-                }
-                scanBtn.disabled = false;
-                scanBtn.innerText = 'RUN FORENSICS';
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    if (type === 'image') {
-                        previewDiv.innerHTML = `<img src="${e.target.result}" class="max-h-48 rounded-lg border border-cyan/30" />`;
-                    } else if (type === 'video') {
-                        previewDiv.innerHTML = `<video src="${e.target.result}" controls class="max-h-48 rounded-lg border border-cyan/30 w-full"></video>`;
-                    } else {
-                        previewDiv.innerHTML = `<audio src="${e.target.result}" controls class="w-full"></audio><p class="text-xs text-gray-400 mt-2">${file.name}</p>`;
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
+    Object.entries(tabs).forEach(([key, { tab }]) => {
+        tab.addEventListener('click', () => setActiveTab(key));
+    });
 
-            dropZone.addEventListener('click', () => fileInput.click());
-            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-cyan/80'); });
-            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-cyan/80'));
-            dropZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropZone.classList.remove('border-cyan/80');
-                if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
-            });
-            fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
-            scanBtn.disabled = true;
-        }
-        setupPreview('image');
-        setupPreview('video');
-        setupPreview('audio');
+    // ======================== FILE PREVIEW ========================
+    function setupPreview(type) {
+        const dropZone  = document.getElementById(`dropZone${type.charAt(0).toUpperCase() + type.slice(1)}`);
+        const fileInput = document.getElementById(`fileInput${type.charAt(0).toUpperCase() + type.slice(1)}`);
+        const previewDiv= document.getElementById(`${type}PreviewContent`);
+        const scanBtn   = document.getElementById(`scan${type.charAt(0).toUpperCase() + type.slice(1)}Btn`);
 
-        // ======================== REAL VIDEO UPLOAD & PROCESSING ========================
-        const scanVideoBtn = document.getElementById('scanVideoBtn');
-        const videoFileInput = document.getElementById('fileInputVideo');
-
-        scanVideoBtn.addEventListener('click', async function() {
-            const file = videoFileInput.files[0];
-            if (!file) {
-                alert('Please select a video first.');
+        function handleFile(file) {
+            const maxSize = type === 'video' ? 200 * 1024 * 1024 : 50 * 1024 * 1024;
+            if (file.size > maxSize) {
+                previewDiv.innerHTML = `<span class="text-red-400 text-sm">File too large</span>`;
+                scanBtn.disabled = true;
                 return;
             }
-
-            // Disable button, show processing state
-            scanVideoBtn.disabled = true;
-            const originalText = scanVideoBtn.innerHTML;
-            scanVideoBtn.innerHTML = `<span class="material-symbols-outlined animate-spin text-base mr-2">radar</span> PROCESSING...`;
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                const response = await fetch('/upload_video', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-
-                if (data.success) {
-                    let message = data.message || 'Processing complete';
-                    if (data.faces_zip) {
-                        // Create a download link for the faces ZIP
-                        message += ` <a href="${data.faces_zip}" download class="underline text-cyan hover:text-white">Download faces ZIP</a>`;
-                    }
-                    scanVideoBtn.innerHTML = `✅ ${message}`;
-                    // Optional: redirect after a few seconds
-                    setTimeout(() => {
-                        window.location.href = "/auth";
-                    }, 3000);
+            scanBtn.disabled = false;
+            scanBtn.innerText = 'RUN FORENSICS';
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (type === 'image') {
+                    previewDiv.innerHTML = `<img src="${e.target.result}" class="max-h-48 rounded-lg border border-cyan/30" />`;
+                } else if (type === 'video') {
+                    previewDiv.innerHTML = `<video src="${e.target.result}" controls class="max-h-48 rounded-lg border border-cyan/30 w-full"></video>
+                        <p class="text-xs text-gray-400 mt-2 truncate max-w-full">${file.name}</p>`;
                 } else {
-                    scanVideoBtn.innerHTML = `❌ Error: ${data.error || 'Unknown error'}`;
-                    scanVideoBtn.disabled = false;
-                    // Re-enable after 4 seconds so user can retry
-                    setTimeout(() => {
-                        if (scanVideoBtn.innerText.startsWith('❌')) {
-                            scanVideoBtn.innerHTML = originalText;
-                            scanVideoBtn.disabled = false;
-                        }
-                    }, 4000);
+                    previewDiv.innerHTML = `<audio src="${e.target.result}" controls class="w-full"></audio>
+                        <p class="text-xs text-gray-400 mt-2">${file.name}</p>`;
                 }
-            } catch (err) {
-                console.error(err);
-                scanVideoBtn.innerHTML = `❌ Network error (is Flask running?)`;
-                scanVideoBtn.disabled = false;
-            }
-        });
-
-        // ======================== DUMMY IMAGE & AUDIO SCAN (simulation) ========================
-        const scanImageBtn = document.getElementById('scanImageBtn');
-        const scanAudioBtn = document.getElementById('scanAudioBtn');
-        const fileInputImage = document.getElementById('fileInputImage');
-        const fileInputAudio = document.getElementById('fileInputAudio');
-
-        function dummyScan(btn, fileInput, type) {
-            btn.addEventListener('click', function() {
-                if (btn.disabled) return;
-                if (!fileInput.files[0]) {
-                    alert(`Please select a ${type} first.`);
-                    return;
-                }
-                btn.disabled = true;
-                btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-base mr-2">radar</span> 0%`;
-                let percent = 0;
-                const interval = setInterval(() => {
-                    percent += 25;
-                    btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-base mr-2">radar</span> ${percent}%`;
-                    if (percent >= 100) {
-                        clearInterval(interval);
-                        btn.innerHTML = `✅ AUTHENTIC 98.3%`;
-                        setTimeout(() => {
-                            window.location.href = "/auth";
-                        }, 1000);
-                    }
-                }, 600);
-            });
+            };
+            reader.readAsDataURL(file);
         }
-        dummyScan(scanImageBtn, fileInputImage, 'image');
-        dummyScan(scanAudioBtn, fileInputAudio, 'audio');
-    })();
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-cyan/80'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-cyan/80'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-cyan/80');
+            if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+        scanBtn.disabled = true;
+    }
+
+    setupPreview('image');
+    setupPreview('video');
+    setupPreview('audio');
+
+    // ======================== PROCESSING OVERLAY HELPERS ========================
+    const overlay     = document.getElementById('processingOverlay');
+    const overlayErr  = document.getElementById('overlayError');
+    const stepIds     = ['step1','step2','step3','step4','step5'];
+
+    function showOverlay() {
+        stepIds.forEach(id => {
+            const el = document.getElementById(id);
+            el.classList.remove('done', 'active-step');
+        });
+        overlayErr.classList.add('hidden');
+        overlay.classList.add('active');
+    }
+
+    function setStep(n) {
+        // n = 1..5 — mark all before as done, n as active
+        stepIds.forEach((id, i) => {
+            const el = document.getElementById(id);
+            el.classList.remove('done', 'active-step');
+            if (i < n - 1) el.classList.add('done');
+            if (i === n - 1) el.classList.add('active-step');
+        });
+    }
+
+    function completeAllSteps() {
+        stepIds.forEach(id => {
+            const el = document.getElementById(id);
+            el.classList.remove('active-step');
+            el.classList.add('done');
+        });
+    }
+
+    function showOverlayError(msg) {
+        overlayErr.textContent = msg;
+        overlayErr.classList.remove('hidden');
+    }
+
+    function hideOverlay() {
+        overlay.classList.remove('active');
+    }
+
+    // ======================== REAL VIDEO UPLOAD ========================
+    const scanVideoBtn   = document.getElementById('scanVideoBtn');
+    const videoFileInput = document.getElementById('fileInputVideo');
+
+    scanVideoBtn.addEventListener('click', async function () {
+        const file = videoFileInput.files[0];
+        if (!file) { alert('Please select a video first.'); return; }
+
+        // Show overlay, step 1
+        showOverlay();
+        setStep(1);
+        scanVideoBtn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // Simulate step progression while waiting
+        setTimeout(() => setStep(2), 800);
+        setTimeout(() => setStep(3), 3000);
+        setTimeout(() => setStep(4), 6000);
+
+        try {
+            const response = await fetch('/upload_video', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Update deepfake index in footer
+                if (data.authenticity !== null && data.authenticity !== undefined) {
+                    const fakePercent = (100 - data.authenticity).toFixed(1);
+                    document.getElementById('deepfakeIndex').textContent = fakePercent + '%';
+                }
+
+                // Complete all steps then redirect
+                setStep(5);
+                setTimeout(() => {
+                    completeAllSteps();
+                    setTimeout(() => {
+                        hideOverlay();
+                        window.location.href = '/report';  // ✅ redirect to real report
+                    }, 600);
+                }, 800);
+
+            } else {
+                showOverlayError('Error: ' + (data.error || 'Unknown error occurred'));
+                setTimeout(() => {
+                    hideOverlay();
+                    scanVideoBtn.disabled = false;
+                    scanVideoBtn.innerText = 'RUN FORENSICS';
+                }, 3000);
+            }
+
+        } catch (err) {
+            console.error(err);
+            showOverlayError('Network error — is Flask running?');
+            setTimeout(() => {
+                hideOverlay();
+                scanVideoBtn.disabled = false;
+                scanVideoBtn.innerText = 'RUN FORENSICS';
+            }, 3000);
+        }
+    });
+
+    // ======================== DUMMY IMAGE & AUDIO SCAN ========================
+    function dummyScan(btnId, inputId, type) {
+        const btn   = document.getElementById(btnId);
+        const input = document.getElementById(inputId);
+        btn.addEventListener('click', function () {
+            if (btn.disabled || !input.files[0]) return;
+            btn.disabled = true;
+            btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-base mr-2">radar</span> 0%`;
+            let pct = 0;
+            const iv = setInterval(() => {
+                pct += 25;
+                btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-base mr-2">radar</span> ${pct}%`;
+                if (pct >= 100) {
+                    clearInterval(iv);
+                    btn.innerHTML = `AUTHENTIC 98.3%`;
+                    setTimeout(() => { window.location.href = '/report'; }, 1000);
+                }
+            }, 600);
+        });
+    }
+
+    dummyScan('scanImageBtn', 'fileInputImage', 'image');
+    dummyScan('scanAudioBtn', 'fileInputAudio', 'audio');
+
+})();
 </script>
 </body>
 </html>
