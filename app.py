@@ -10,6 +10,7 @@ from flask import Flask, render_template, request, jsonify, session, redirect
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 from flask_bcrypt import Bcrypt
+from flask import send_from_directory
 
 load_dotenv()
 
@@ -376,7 +377,13 @@ def api_profile():
         'history': history
     })
 
-
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(
+        os.path.join(app.root_path, 'app', 'static'),
+        'favicon.ico',
+        mimetype='image/vnd.microsoft.icon'
+    )
 # ========== PAGE ROUTES ==========
 
 @app.route("/")
@@ -419,4 +426,5 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)

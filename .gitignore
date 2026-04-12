@@ -1,7 +1,11 @@
-__pycache__
-venv
-*.pyc
-*.pyo
-*.pyd   
 .env
-*.env
+__pycache__/
+*.pyc
+uploads/
+frames/
+faces/
+tmp_checkpoint/
+*.h5
+*.keras
+venv/
+node_modules/
