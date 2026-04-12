@@ -129,11 +129,8 @@
                             <a href="#" class="text-primary hover:underline">forgot?</a>
                         </div>
 
-                        <!-- login button (simulates redirect to verification page) -->
-                        <button type="button" onclick="goToUpload()" 
-class="w-full bg-primary text-black py-4 rounded-xl font-bold text-base tracking-wide hover:scale-[1.02] transition-all hover-glow flex items-center justify-center gap-2 mt-8">
-    <span class="material-symbols-outlined">login</span> Start Verification
-</button>
+                        <!-- login button -->
+                        <button type="button" onclick="handleLogin()" class="w-full rounded-2xl py-3 bg-primary text-black font-semibold hover:bg-cyan-300 transition">login</button>
                     </div>
                 </form>
 
@@ -184,11 +181,8 @@ class="w-full bg-primary text-black py-4 rounded-xl font-bold text-base tracking
                             <span class="text-slate-300">i agree to the <a href="#" class="text-primary hover:underline">terms</a> and <a href="#" class="text-primary hover:underline">privacy policy</a></span>
                         </div>
 
-                        <!-- signup button (simulates registration + redirect) -->
-                        <button type="button" onclick="goToUpload()" 
-class="w-full bg-primary text-black py-4 rounded-xl font-bold text-base tracking-wide hover:scale-[1.02] transition-all hover-glow flex items-center justify-center gap-2 mt-8">
-    <span class="material-symbols-outlined">person_add</span> Create Account & Verify
-</button>
+                        <!-- signup button -->
+                        <button type="button" onclick="handleSignup()" class="w-full rounded-2xl py-3 bg-primary text-black font-semibold hover:bg-cyan-300 transition">sign up</button>
                     </div>
                 </form>
 
@@ -253,54 +247,93 @@ class="w-full bg-primary text-black py-4 rounded-xl font-bold text-base tracking
             switchToLoginBtn.addEventListener('click', () => setActiveTab('login'));
         }
 
-        // simulate login action -> redirect to "scanning / verification" page
-        function handleLogin() {
-            // simple validation dummy (just for demo)
-            const email = document.getElementById('loginEmail')?.value;
-            const pwd = document.getElementById('loginPassword')?.value;
-            if (!email || !pwd) {
-                alert('please fill in both fields (demo: any credentials work)');
-                return;
-            }
-            // redirect to the scanning page (we'll open in same window)
-            window.location.href = 'scanning.html'; // assuming scanning page exists, but for demo we can show alert + fake redirect
-            // if you want to simulate, we can show message and replace content (but we'll redirect to a placeholder)
-            // For this demo, we'll use a fallback: since scanning page might not exist, we show alert and then simulate.
-            alert('login successful! redirecting to neural scan hub... (demo)');
-            // optional: replace page with a simple message or open the scanning code (we could embed an iframe but better to just pretend)
-            // In context of this task we output a separate scanning page. We can simulate by opening a new page.
-            // For now we do a window.location to a relative 'scanning.html' – if not present, we display message.
-            // To keep it self-contained, we'll redirect to a generated scanning page using a data URI? better show alert.
-            // We'll just display a success message and change body text (simple demo).
-            document.body.innerHTML = `<div class="min-h-screen flex items-center justify-center text-primary text-xl">✅ redirecting to deepfake scanner ... (login mock)</div>`;
-            setTimeout(() => { window.location.href = 'about:blank'; }, 1500); // just for fun, avoid.
-        }
+        // // simulate login action -> redirect to "scanning / verification" page
+        // function handleLogin() {
+        //     // simple validation dummy (just for demo)
+        //     const email = document.getElementById('loginEmail')?.value;
+        //     const pwd = document.getElementById('loginPassword')?.value;
+        //     if (!email || !pwd) {
+        //         alert('please fill in both fields (demo: any credentials work)');
+        //         return;
+        //     }
+        //     // redirect to the scanning page (we'll open in same window)
+        //     window.location.href = 'scanning.html'; // assuming scanning page exists, but for demo we can show alert + fake redirect
+        //     // if you want to simulate, we can show message and replace content (but we'll redirect to a placeholder)
+        //     // For this demo, we'll use a fallback: since scanning page might not exist, we show alert and then simulate.
+        //     alert('login successful! redirecting to neural scan hub... (demo)');
+        //     // optional: replace page with a simple message or open the scanning code (we could embed an iframe but better to just pretend)
+        //     // In context of this task we output a separate scanning page. We can simulate by opening a new page.
+        //     // For now we do a window.location to a relative 'scanning.html' – if not present, we display message.
+        //     // To keep it self-contained, we'll redirect to a generated scanning page using a data URI? better show alert.
+        //     // We'll just display a success message and change body text (simple demo).
+        //     document.body.innerHTML = `<div class="min-h-screen flex items-center justify-center text-primary text-xl">✅ redirecting to deepfake scanner ... (login mock)</div>`;
+        //     setTimeout(() => { window.location.href = 'about:blank'; }, 1500); // just for fun, avoid.
+        // }
 
-        function handleSignup() {
-            const name = document.getElementById('signupName')?.value;
-            const email = document.getElementById('signupEmail')?.value;
-            const pwd = document.getElementById('signupPassword')?.value;
-            const confirm = document.getElementById('signupConfirm')?.value;
-            if (!name || !email || !pwd || !confirm) {
-                alert('please fill all fields');
-                return;
-            }
-            if (pwd !== confirm) {
-                alert('passwords do not match');
-                return;
-            }
-            alert('account created! redirecting to verification... (demo)');
-            // similar redirect simulation
-            document.body.innerHTML = `<div class="min-h-screen flex items-center justify-center text-primary text-xl">✅ account created · redirecting to neural scan ...</div>`;
-        }
+        // function handleSignup() {
+        //     const name = document.getElementById('signupName')?.value;
+        //     const email = document.getElementById('signupEmail')?.value;
+        //     const pwd = document.getElementById('signupPassword')?.value;
+        //     const confirm = document.getElementById('signupConfirm')?.value;
+        //     if (!name || !email || !pwd || !confirm) {
+        //         alert('please fill all fields');
+        //         return;
+        //     }
+        //     if (pwd !== confirm) {
+        //         alert('passwords do not match');
+        //         return;
+        //     }
+        //     alert('account created! redirecting to verification... (demo)');
+        //     // similar redirect simulation
+        //     document.body.innerHTML = `<div class="min-h-screen flex items-center justify-center text-primary text-xl">✅ account created · redirecting to neural scan ...</div>`;
+        // }
 
-        // make functions global for onclick
-        window.handleLogin = handleLogin;
-        window.handleSignup = handleSignup;
+        // // make functions global for onclick
+        // window.handleLogin = handleLogin;
+        // window.handleSignup = handleSignup;
     
-        function goToUpload() {
-        window.location.href = "upload.html";
-        }
+
+async function handleLogin() {
+    const email = document.getElementById('loginEmail').value;
+    const pwd   = document.getElementById('loginPassword').value;
+    if (!email || !pwd) { alert('Fill in all fields'); return; }
+
+    const res  = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pwd })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+        window.location.href = data.redirect;
+    } else {
+        alert(data.error || 'Login failed');
+    }
+}
+
+async function handleSignup() {
+    const name    = document.getElementById('signupName').value;
+    const email   = document.getElementById('signupEmail').value;
+    const pwd     = document.getElementById('signupPassword').value;
+    const confirm = document.getElementById('signupConfirm').value;
+
+    if (!name || !email || !pwd || !confirm) { alert('Fill in all fields'); return; }
+    if (pwd !== confirm) { alert('Passwords do not match'); return; }
+
+    const res  = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password: pwd })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+        window.location.href = data.redirect;
+    } else {
+        alert(data.error || 'Signup failed');
+    }
+}
 
     </script>
 </body>
