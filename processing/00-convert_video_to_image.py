@@ -3,13 +3,6 @@ import os
 import cv2
 import math
 
-if len(sys.argv) < 3:
-    print("Usage: python 00-convert_video_to_image.py <video_path> <output_frames_dir>")
-    sys.exit(1)
-
-video_path = sys.argv[1]
-output_frames_dir = sys.argv[2]
-
 def get_filename_only(file_path):
     return os.path.splitext(os.path.basename(file_path))[0]
 
@@ -19,8 +12,20 @@ def process_video(video_path, frames_base_path):
         print(f"Error: Video file not found: {video_path}")
         return False
 
+    # Normalize and ensure the output base path exists
+    frames_base_path = os.path.abspath(frames_base_path)
+    if not frames_base_path:
+        print("Error: No frames output directory provided.")
+        return False
+
+    os.makedirs(frames_base_path, exist_ok=True)
+
     # Create frames subfolder named after the video
     video_name = get_filename_only(video_path)
+    if not video_name:
+        print(f"Error: Unable to determine video name from path: {video_path}")
+        return False
+
     output_dir = os.path.join(frames_base_path, video_name)
     os.makedirs(output_dir, exist_ok=True)
     print(f"Creating directory: {output_dir}")
@@ -64,13 +69,12 @@ def process_video(video_path, frames_base_path):
     return True
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python 00-convert_video_to_image.py <video_path>")
+    if len(sys.argv) != 3:
+        print("Usage: python 00-convert_video_to_image.py <video_path> <output_frames_dir>")
         sys.exit(1)
 
     video_path = sys.argv[1]
-    # You can change this path or make it configurable
-    frames_base_path = r"E:\Setu\flask\frames"
+    frames_base_path = sys.argv[2]
 
     success = process_video(video_path, frames_base_path)
     sys.exit(0 if success else 1)

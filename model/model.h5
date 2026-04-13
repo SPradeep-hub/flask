@@ -1,0 +1,18 @@
+import tensorflow as tf
+from tensorflow import keras
+
+# Build your model
+model = keras.Sequential([
+    keras.layers.Dense(128, activation='relu', input_shape=(input_size,)),
+    keras.layers.Dense(64, activation='relu'),
+    keras.layers.Dense(num_classes, activation='softmax')
+])
+
+# Compile
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+# Train
+model.fit(x_train, y_train, epochs=10)
+
+# Save
+model.save('model/model.h5')

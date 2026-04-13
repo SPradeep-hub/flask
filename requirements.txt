@@ -1,0 +1,7 @@
+numpy
+pandas
+tensorflow>=2.10.0
+opencv-python>=4.1.0
+mtcnn>=0.1.0
+h5py
+split-folders

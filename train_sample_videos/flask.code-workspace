@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"name": "flask",
+			"path": ".."
+		},
+		{
+			"name": "prepared_dataset",
+			"path": "../../../../Documents/GitHub/DeepFake-Detect/prepared_dataset"
+		},
+		{
+			"name": "split_dataset",
+			"path": "../../../../Documents/GitHub/DeepFake-Detect/split_dataset"
+		},
+		{
+			"name": "img",
+			"path": "../../../../Documents/GitHub/DeepFake-Detect/img"
+		},
+		{
+			"path": "../../../../Documents/GitHub/DeepFake-Detect/train_sample_videos"
+		}
+	],
+	"settings": {}
+}

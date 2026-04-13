@@ -6,10 +6,6 @@ from pathlib import Path
 
 import cv2
 from mtcnn import MTCNN
-import tensorflow as tf
-
-# Suppress TensorFlow logs
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 # Initialize MTCNN detector
 detector = MTCNN()
@@ -17,6 +13,9 @@ detector = MTCNN()
 def get_filename_only(file_path):
     return Path(file_path).stem
 
+def ensure_dir_exists(dir_path):
+    os.makedirs(dir_path, exist_ok=True)
+    
 def extract_frames(video_path, output_dir, sample_rate=1):
     cap = cv2.VideoCapture(video_path)
     frame_count = 0
@@ -78,6 +77,9 @@ def process_video(video_path, output_zip=None, sample_rate=1):
     with tempfile.TemporaryDirectory() as tmpdir:
         frames_dir = os.path.join(tmpdir, 'frames')
         os.makedirs(frames_dir, exist_ok=True)
+        anextension = os.path.splitext(video_path)[1]
+        if anextension.lower() not in ['.mp4', '.avi', '.mov', '.mkv']:
+            raise ValueError(f"Unsupported video format: {anextension}")    
 
         print(f"Extracting frames from {video_path}...")
         frame_paths = extract_frames(video_path, frames_dir, sample_rate)
