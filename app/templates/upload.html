@@ -2,7 +2,6 @@
 <html lang="en" class="dark">
 <head>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <meta charset="utf-8" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeepVerify · neural forensics</title>
@@ -10,8 +9,6 @@
     <!-- Tailwind (dark professional) -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-
-    
     <!-- Google Font: Space Grotesk + Inter fallback -->
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -34,15 +31,15 @@
             <span class="ml-3 text-[0.6rem] uppercase tracking-[0.2em] text-cyan/40 border border-cyan/20 px-2 py-0.5 rounded-full">v2.4</span>
         </div>
         <div class="hidden md:flex items-center gap-12 text-sm">
-    <a href="/index" class="text-white/70 hover:text-cyan transition-colors duration-300 relative 
+    <a href="index.html" class="text-white/70 hover:text-cyan transition-colors duration-300 relative 
        after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-cyan after:left-0 after:-bottom-1 
        after:transition-all after:duration-300 hover:after:w-full">home</a>
 
-    <a href="/profile" class="text-white/70 hover:text-cyan transition-colors duration-300 relative
+    <a href="profile.html" class="text-white/70 hover:text-cyan transition-colors duration-300 relative
        after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-cyan after:left-0 after:-bottom-1 
        after:transition-all after:duration-300 hover:after:w-full">profile</a>
 
-    <a href="/howitworks" class="text-white/70 hover:text-cyan transition-colors duration-300 relative 
+    <a href="howitworks.html" class="text-white/70 hover:text-cyan transition-colors duration-300 relative 
        after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-cyan after:left-0 after:-bottom-1 
        after:transition-all after:duration-300 hover:after:w-full">how it works</a>
 </div>
@@ -132,37 +129,10 @@
                         <span class="material-symbols-outlined text-5xl text-cyan/40">movie</span>
                         <p class="text-gray-400 text-sm mt-4">awaiting video</p>
                     </div>
-                    <button id="scanVideoBtn"  class="mt-6 bg-cyan/10 border border-cyan/30 text-cyan/90 px-8 py-3 rounded-full font-mono text-sm w-full hover:bg-cyan hover:text-black disabled:opacity-30" disabled>RUN FORENSICS</button>
+                    <button id="scanVideoBtn" class="mt-6 bg-cyan/10 border border-cyan/30 text-cyan/90 px-8 py-3 rounded-full font-mono text-sm w-full hover:bg-cyan hover:text-black disabled:opacity-30" disabled>RUN FORENSICS</button>
                 </div>
             </div>
         </div>
-            <!-- ===== VIDEO PANEL (same refined style) ===== -->
-            <div id="panelVideo" class="tab-panel hidden transition-opacity duration-500">
-                <div class="grid md:grid-cols-2 gap-8 items-stretch">
-                    <div id="dropZoneVideo"
-                        class="glass-panel rounded-2xl border-2 border-dashed border-cyan/30 p-8 text-center cursor-pointer hover:border-cyan/70 transition-all data-flow">
-                        <span
-                            class="material-symbols-outlined text-6xl text-cyan/60 group-hover:text-cyan/90 transition-all ring-rotate inline-block">videocam</span>
-                        <h3 class="text-xl font-medium mt-4 text-white/90">Upload video</h3>
-                        <p class="text-gray-400 text-sm mt-2">MP4, MOV, WebM · up to 200 MB</p>
-                        <input type="file" id="fileInputVideo" style="display:block; margin-top:10px;"
-                            accept="video/mp4,video/quicktime,video/webm">
-                        <button onclick="document.getElementById('fileInputVideo').click()"
-                            class="mt-6 bg-cyan/10 border border-cyan/40 text-cyan px-8 py-2.5 rounded-full text-sm font-medium tracking-wide hover:bg-cyan/20">SELECT
-                            FILE</button>
-                    </div>
-                    <div class="glass-panel rounded-2xl p-6 flex flex-col items-center justify-center border border-cyan/20"
-                        id="videoPreviewPanel">
-                        <div id="videoPreviewContent" class="w-full flex flex-col items-center">
-                            <span class="material-symbols-outlined text-5xl text-cyan/40">movie</span>
-                            <p class="text-gray-400 text-sm mt-4">awaiting video</p>
-                        </div>
-                        <button id="scanVideoBtn"
-                            class="mt-6 bg-cyan/10 border border-cyan/30 text-cyan/90 px-8 py-3 rounded-full font-mono text-sm w-full hover:bg-cyan hover:text-black disabled:opacity-30"
-                            disabled>RUN FORENSICS</button>
-                    </div>
-                </div>
-            </div>
 
         <!-- ===== AUDIO PANEL ===== -->
         <div id="panelAudio" class="tab-panel hidden transition-opacity duration-500">
@@ -187,7 +157,7 @@
                         </div>
                         <p class="text-gray-400 text-sm">awaiting audio</p>
                     </div>
-                    <button id="scanAudioBtn" href = "/auth" class="mt-6 bg-cyan/10 border border-cyan/30 text-cyan/90 px-8 py-3 rounded-full font-mono text-sm w-full hover:bg-cyan hover:text-black disabled:opacity-30" disabled>RUN FORENSICS</button>
+                    <button id="scanAudioBtn" class="mt-6 bg-cyan/10 border border-cyan/30 text-cyan/90 px-8 py-3 rounded-full font-mono text-sm w-full hover:bg-cyan hover:text-black disabled:opacity-30" disabled>RUN FORENSICS</button>
                 </div>
             </div>
         </div>
@@ -297,7 +267,7 @@
     scanBtn.innerHTML = `✅ AUTHENTIC 98.3%`;
     
     setTimeout(() => {
-        window.location.href = "/auth";
+        window.location.href = "auth.html";
     }, 1000); // redirect after 1 second
 }
                 }, 600);

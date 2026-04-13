@@ -115,31 +115,31 @@ def home():
 
 @app.route("/login")
 def login():
-    return render_template("/login")
+    return render_template("login.html")
 
 @app.route("/auth")
 def auth():
-    return render_template("/auth")
+    return render_template("auth.html")
 
 @app.route("/howitworks")
 def how():
-    return render_template("/howitworks")
+    return render_template("howitworks.html")
 
 @app.route("/profile")
 def profile():
-    return render_template("/profile")
+    return render_template("profile.html")
 
 @app.route("/report")
 def report():
-    return render_template("/report")
+    return render_template("report.html")
 
 @app.route("/upload")
 def upload():
-    return render_template("/upload")
+    return render_template("upload.html")
 
 @app.route("/index")
 def index():
-    return render_template("/index")
+    return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
