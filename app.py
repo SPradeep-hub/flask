@@ -349,10 +349,7 @@ def upload_audio():
         'verdict': verdict, 'duration': duration,
         'redirect': '/report'
     })
-
-
 # ========== PROFILE API ==========
-
 @app.route('/api/profile')
 def api_profile():
     if 'user_email' not in session:

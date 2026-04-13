@@ -34,7 +34,7 @@ os.makedirs(tmp_debug_path, exist_ok=True)
 
 # Parameters
 input_size = 128
-batch_size_num = 32
+batch_size_num = 64
 
 # ✅ Data Generators (with correct preprocessing)
 train_datagen = ImageDataGenerator(
