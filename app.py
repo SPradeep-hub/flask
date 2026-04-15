@@ -86,8 +86,8 @@ def save_history(filename, media_type, authenticity, verdict):
     try:
         if session.get('user_email'):
             history_col.insert_one({
-                'user_email':  session.get('user_email'),
-                'user_name':   session.get('user_name', ''),
+                'user_email':  session.get('user_email' ),
+                'user_name':   session.get('user_name',''),
                 'filename':    filename,
                 'media_type':  media_type,
                 'authenticity': authenticity,
@@ -109,7 +109,6 @@ def login_required(f):
             return redirect('/login')
         return f(*args, **kwargs)
     return decorated
-
 
 # ========== AUTH ROUTES ==========
 

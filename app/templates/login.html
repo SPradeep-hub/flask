@@ -1,531 +1,340 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html lang="en" class="dark">
 <head>
-  <link rel="icon" type="image/png" href="images/favicon.png">
-  <meta charset="utf-8" />
-  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>DeepVerify | Restoring Trust in the Digital Era</title>
-  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
-  <!-- Tailwind + Plugins -->
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <!-- Google Fonts: Space Grotesk & Material Symbols Outlined (fix: load material icons font) -->
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet" onerror="this.remove()" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" onerror="this.remove()" />
-  
-  <script>
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "primary": "#00e9fa",
-            "background-light": "#fafafa",
-            "background-dark": "#121416",
-            "surface": "#1e2226",
-            "border-accent": "#2e676b"
-          },
-          fontFamily: {
-            "display": ["Space Grotesk", "sans-serif"]
-          },
-          borderRadius: {
-            "DEFAULT": "0.25rem",
-            "lg": "0.5rem",
-            "xl": "0.75rem",
-            "full": "9999px"
-          },
-        },
-      },
-    }
-  </script>
-  
-  <style>
-    body {
-  font-family: "Space Grotesk", system-ui, -apple-system, Arial, sans-serif;
-}
-    /* custom animations & utilities - includes all required classes (fix: style.css equivalent definitions) */
-    .glass-morphism {
-      background: rgba(35, 16, 71, 0.05);
-      backdrop-filter: blur(12px) saturate(180%);
-      -webkit-backdrop-filter: blur(12px) saturate(180%);
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-    .animate-slideDown {
-      animation: slideDown 0.7s cubic-bezier(0.16,1,0.3,1) forwards;
-    }
-    @keyframes slideDown {
-      0% { opacity: 0; transform: translateY(-30px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fadeInUp {
-      opacity: 0;
-      animation: fadeInUp 0.8s cubic-bezier(0.2,0.9,0.3,1) forwards;
-    }
-    /* custom animation classes used in the page */
-    .animate-fadeIn {
-      animation: fadeIn 0.6s ease forwards;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    .delay-1 { animation-delay: 0.1s; }
-    .delay-2 { animation-delay: 0.2s; }
-    .delay-3 { animation-delay: 0.3s; }
-    .delay-4 { animation-delay: 0.4s; }
-    @keyframes fadeInUp {
-      0% { opacity: 0; transform: translateY(20px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    .animate-pulse-gpu-accelerated {
-      animation: pulseGpu 2.5s infinite ease-in-out;
-      will-change: transform, opacity;
-    }
-    @keyframes pulseGpu {
-      0%,100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.9; transform: scale(1.02); }
-    }
-    .animate-pulse-glow {
-      animation: pulseGlow 3s infinite alternate;
-    }
-    @keyframes pulseGlow {
-      0% { opacity: 0.3; transform: scale(1); }
-      100% { opacity: 0.6; transform: scale(1.3); }
-    }
-    /* scan-line and .animate-scan class fix */
-    .scan-line {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: linear-gradient(90deg, transparent, #00e9fa, transparent);
-      box-shadow: 0 0 20px #00e9fa;
-      animation: scanMove 4s linear infinite;
-      opacity: 0.7;
-      z-index: 10;
-      pointer-events: none;
-    }
-    @keyframes scanMove {
-      0% { top: 0%; }
-      100% { top: 100%; }
-    }
-    .animate-scan {
-      animation: scanMove 4s linear infinite;
-    }
-    .animate-float {
-      animation: float 5s ease-in-out infinite;
-    }
-    @keyframes float {
-      0%,100% { transform: translateY(0px); }
-      50% { transform: translateY(-8px); }
-    }
-    .animate-marquee {
-  display: flex;
-  width: max-content;
-  animation: marquee 20s linear infinite;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepVerify · login / sign up</title>
+<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-@keyframes marquee {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-    @keyframes marquee {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-    .animate-rotate-slow {
-      animation: rotateSlow 20s linear infinite;
-    }
-    .animate-float-reverse {
-  animation: float 5s ease-in-out infinite reverse;
-}
-    @keyframes rotateSlow {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .group:hover .group-hover\:animate-bounce-subtle {
-      animation: bounceSubtle 0.6s ease infinite;
-    }
-    @keyframes bounceSubtle {
-      0%,100% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
-    }
-    /* toggle container for dark mode (fix: dark mode button alignment) */
-    .toggle-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255,255,255,0.05);
-  padding: 6px 12px;
-  border-radius: 40px;
-  backdrop-filter: blur(4px);
-}
+    <!-- Google Font + Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0,1" />
 
-.toggle-switch {
-  width: 42px;
-  height: 22px;
-  background: #2d2f36;
-  border-radius: 999px;
-  position: relative;
-  cursor: pointer;
-  transition: background 0.3s;
-}
+    <style>
+        * {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        body {
+            background-color: #0a0a0f;
+            color: white;
+        }
 
-/* knob */
-.toggle-switch::after {
-  content: '';
-  width: 18px;
-  height: 18px;
-  background: #00e9fa;
-  border-radius: 50%;
-  position: absolute;
-  top: 2px;
-  left: 3px;
-  transition: transform 0.3s;
-}
+        .text-primary {
+            color: #00e9fa;
+        }
+        .bg-primary {
+            background-color: #00e9fa;
+        }
+        .border-primary {
+            border-color: #00e9fa;
+        }
+        .glass-panel {
+            background: rgba(20, 25, 35, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 233, 250, 0.15);
+        }
 
-/* dark mode active */
-.dark .toggle-switch {
-  background: rgba(0, 233, 250, 0.3);
-}
+        /* animations */
+        @keyframes float-bg {
+            0% { transform: translateY(0px) translateX(0px); }
+            50% { transform: translateY(-20px) translateX(10px); }
+            100% { transform: translateY(0px) translateX(0px); }
+        }
+        .animate-float-bg {
+            animation: float-bg 18s infinite ease-in-out;
+        }
 
-.dark .toggle-switch::after {
-  transform: translateX(20px);
-}
+        @keyframes glow-pulse {
+            0%,100% { box-shadow: 0 0 20px rgba(0,233,250,0.2); }
+            50% { box-shadow: 0 0 60px rgba(0,233,250,0.6); }
+        }
+        .glow-pulse {
+            animation: glow-pulse 3s infinite;
+        }
 
-/* focus visible */
-.toggle-switch:focus-visible {
-  outline: 2px solid #00e9fa;
-  outline-offset: 3px;
-}
-    .delay-\[1s\] { animation-delay: 1s; }
-    /* Global focus styles (keyboard accessibility) */
-:focus-visible {
-  outline: 2px solid #00e9fa;
-  outline-offset: 3px;
-  box-shadow: 0 0 0 3px rgba(0, 233, 250, 0.3);
-  border-radius: 6px;
-}
+        .hover-glow:hover {
+            box-shadow: 0 0 25px rgba(0,233,250,0.5);
+            transition: box-shadow 0.3s;
+        }
 
-/* Smooth transition */
-a, button, [role="switch"] {
-  transition: outline 0.2s, box-shadow 0.2s;
-}
-/* Global focus styles (keyboard accessibility) */
-:focus-visible {
-  outline: 2px solid #00e9fa;
-  outline-offset: 3px;
-  box-shadow: 0 0 0 3px rgba(0, 233, 250, 0.3);
-  border-radius: 6px;
-}
+        /* neural grid background */
+        .neural-bg {
+            background-image: 
+                linear-gradient(rgba(0,233,250,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,233,250,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
 
-/* Smooth transition */
-a, button, [role="switch"] {
-  transition: outline 0.2s, box-shadow 0.2s;
-}
-/* Glass navbar effect */
-.glass-deep {
-    background: rgba(12, 15, 25, 0.65);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(0, 255, 255, 0.15);
-    border-bottom: 1px solid rgba(0, 255, 255, 0.3);
-    box-shadow: 0 20px 40px -15px rgba(32, 183, 189, 0.6), 0 0 0 1px rgba(0, 255, 255, 0.1) inset;
-}
-
-/* Online dot indicator */
-
-@keyframes dotPulse {
-    0% { opacity: 0.7; box-shadow: 0 0 5px #2df0ff; }
-    50% { opacity: 1; box-shadow: 0 0 15px #2df0ff; }
-    100% { opacity: 0.7; box-shadow: 0 0 5px #2df0ff; }
-}
-
-/* Text cyan */
-.text-cyan { color: #2df0ff; }
-.border-cyan { border-color: #2df0ff; }
-  </style>
+        .tab-active {
+            background: rgba(0, 233, 250, 0.15);
+            color: #00e9fa;
+            border-color: #00e9fa;
+            font-weight: 600;
+        }
+    </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white overflow-x-hidden">
+<body class="min-h-screen flex items-center justify-center neural-bg relative overflow-x-hidden">
 
-<!-- TopNavBar with dark mode toggle button alignment fixed -->
-<nav class="fixed top-0 left-0 right-0 z-50 glass-morphism border-b border-white/5 px-6 lg:px-20 py-4 flex items-center justify-between animate-slideDown">
-  <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-cyan text-3xl">verified</span>
-            <span class="text-2xl font-semibold tracking-tight text-white">
-                DEEP<span class="text-cyan font-light">VERIFY</span>
-            </span>
-            <span class="ml-3 text-[0.6rem] uppercase tracking-[0.2em] text-cyan/40 border border-cyan/20 px-2 py-0.5 rounded-full">v2.4</span>
+    <!-- floating neural orbs (background decoration) -->
+    <div class="absolute top-20 left-10 w-64 h-64 rounded-full bg-primary/5 blur-3xl animate-float-bg"></div>
+    <div class="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-primary/10 blur-3xl animate-float-bg" style="animation-delay: -5s;"></div>
+
+    <!-- main login/signup card -->
+    <div class="relative z-10 w-full max-w-md px-4 py-8">
+
+        <!-- logo / brand -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-primary">DEEP<span class="text-white">VERIFY</span></h1>
+            <p class="text-slate-400 text-sm mt-2">neural deepfake detection · secure access</p>
         </div>
-  <div class="hidden md:flex items-center gap-10">
-    <!-- Fix: sab href pe assign kro (all nav links have proper href) -->
-    <a class="text-sm font-medium hover:text-primary transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full" href="#" onclick="handleProtectedRoute('/upload')" >upload media</a>
-    <a class="text-sm font-medium hover:text-primary transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"href="#" onclick="handleProtectedRoute('/profile')" >profile</a>
- <a class="text-sm font-medium hover:text-primary transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-primary after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full" href="/howitworks" >how it works</a>
-  </div>
-  </div>
-  <div class="flex items-center gap-4">
-    <!-- Dark Mode Toggle Button - alignment fixed: inline-flex with proper spacing -->
-    <div class="toggle-container">
-      <span class="material-symbols-outlined text-sm text-slate-300">dark_mode</span>
-      <div id="darkModeToggle"
-     class="toggle-switch"
-     role="switch"
-     aria-label="Dark mode toggle">
-</div>
-      <span class="material-symbols-outlined text-sm text-slate-300">light_mode</span>
+
+        <!-- glass card -->
+        <div class="glass-panel rounded-3xl border border-primary/20 p-8 glow-pulse">
+
+            <!-- tab switcher: login / signup -->
+            <div class="flex gap-2 p-1 bg-black/40 rounded-2xl border border-primary/20 mb-8">
+                <button id="loginTabBtn" class="tab-btn flex-1 py-3 rounded-xl text-sm font-bold transition-all tab-active">login</button>
+                <button id="signupTabBtn" class="tab-btn flex-1 py-3 rounded-xl text-sm font-bold transition-all text-slate-400">sign up</button>
+            </div>
+
+            <!-- ========== LOGIN FORM ========== -->
+            <div id="loginForm" class="form-panel block">
+                <form id="loginFormElement" onsubmit="event.preventDefault(); handleLogin();">
+                    <div class="space-y-5">
+                        <!-- email -->
+                        <div>
+                            <label class="text-xs text-slate-400 uppercase tracking-wider block mb-2">email</label>
+                            <div class="flex items-center gap-3 bg-black/30 border border-primary/20 rounded-xl px-4 py-3 focus-within:border-primary transition-all">
+                                <span class="material-symbols-outlined text-primary text-sm">mail</span>
+                                <input type="email" id="loginEmail" placeholder="e.g. elena@deepverify.ai" class="w-full bg-transparent outline-none text-sm text-white placeholder:text-slate-600" required>
+                            </div>
+                        </div>
+                        <!-- password -->
+                        <div>
+                            <label class="text-xs text-slate-400 uppercase tracking-wider block mb-2">password</label>
+                            <div class="flex items-center gap-3 bg-black/30 border border-primary/20 rounded-xl px-4 py-3 focus-within:border-primary transition-all">
+                                <span class="material-symbols-outlined text-primary text-sm">lock</span>
+                                <input type="password" id="loginPassword" placeholder="••••••••" class="w-full bg-transparent outline-none text-sm text-white placeholder:text-slate-600" required>
+                            </div>
+                        </div>
+
+                        <!-- remember & forgot -->
+                        <div class="flex items-center justify-between text-xs">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" class="accent-primary bg-black/30 border-primary/30 rounded">
+                                <span class="text-slate-300">remember session</span>
+                            </label>
+                            <a href="#" class="text-primary hover:underline">forgot?</a>
+                        </div>
+
+                        <!-- login button -->
+                        <button type="button" onclick="handleLogin()" class="w-full rounded-2xl py-3 bg-primary text-black font-semibold hover:bg-cyan-300 transition">login</button>
+                    </div>
+                </form>
+
+                <!-- alternative (demo note) -->
+                <p class="text-center text-xs text-slate-500 mt-6">demo: any credentials work</p>
+            </div>
+
+            <!-- ========== SIGNUP FORM ========== -->
+            <div id="signupForm" class="form-panel hidden">
+                <form id="signupFormElement" onsubmit="event.preventDefault(); handleSignup();">
+                    <div class="space-y-5">
+                        <!-- full name -->
+                        <div>
+                            <label class="text-xs text-slate-400 uppercase tracking-wider block mb-2">full name</label>
+                            <div class="flex items-center gap-3 bg-black/30 border border-primary/20 rounded-xl px-4 py-3 focus-within:border-primary transition-all">
+                                <span class="material-symbols-outlined text-primary text-sm">badge</span>
+                                <input type="text" id="signupName" placeholder="Dr. Elena K." class="w-full bg-transparent outline-none text-sm text-white placeholder:text-slate-600" required>
+                            </div>
+                        </div>
+                        <!-- email -->
+                        <div>
+                            <label class="text-xs text-slate-400 uppercase tracking-wider block mb-2">email</label>
+                            <div class="flex items-center gap-3 bg-black/30 border border-primary/20 rounded-xl px-4 py-3 focus-within:border-primary transition-all">
+                                <span class="material-symbols-outlined text-primary text-sm">mail</span>
+                                <input type="email" id="signupEmail" placeholder="contact@deepverify.ai" class="w-full bg-transparent outline-none text-sm text-white placeholder:text-slate-600" required>
+                            </div>
+                        </div>
+                        <!-- password -->
+                        <div>
+                            <label class="text-xs text-slate-400 uppercase tracking-wider block mb-2">password</label>
+                            <div class="flex items-center gap-3 bg-black/30 border border-primary/20 rounded-xl px-4 py-3 focus-within:border-primary transition-all">
+                                <span class="material-symbols-outlined text-primary text-sm">lock</span>
+                                <input type="password" id="signupPassword" placeholder="min. 8 characters" class="w-full bg-transparent outline-none text-sm text-white placeholder:text-slate-600" required>
+                            </div>
+                        </div>
+                        <!-- confirm password (simple) -->
+                        <div>
+                            <label class="text-xs text-slate-400 uppercase tracking-wider block mb-2">confirm password</label>
+                            <div class="flex items-center gap-3 bg-black/30 border border-primary/20 rounded-xl px-4 py-3 focus-within:border-primary transition-all">
+                                <span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+                                <input type="password" id="signupConfirm" placeholder="••••••••" class="w-full bg-transparent outline-none text-sm text-white placeholder:text-slate-600" required>
+                            </div>
+                        </div>
+
+                        <!-- terms -->
+                        <div class="flex items-center gap-2 text-xs">
+                            <input type="checkbox" class="accent-primary" required>
+                            <span class="text-slate-300">i agree to the <a href="#" class="text-primary hover:underline">terms</a> and <a href="#" class="text-primary hover:underline">privacy policy</a></span>
+                        </div>
+
+                        <!-- signup button -->
+                        <button type="button" onclick="handleSignup()" class="w-full rounded-2xl py-3 bg-primary text-black font-semibold hover:bg-cyan-300 transition">sign up</button>
+                    </div>
+                </form>
+
+                <p class="text-center text-xs text-slate-500 mt-6">already registered? <button id="switchToLogin" class="text-primary hover:underline bg-transparent">login</button></p>
+            </div>
+
+            <!-- additional auth options (just for style) -->
+            <div class="mt-8 flex items-center gap-4">
+                <div class="h-px flex-1 bg-primary/20"></div>
+                <span class="text-xs text-slate-500">or continue with</span>
+                <div class="h-px flex-1 bg-primary/20"></div>
+            </div>
+            <div class="flex justify-center gap-4 mt-6">
+                <button class="bg-black/40 border border-primary/20 p-3 rounded-xl hover:bg-primary/10 transition-all">
+                    <span class="material-symbols-outlined text-primary">g_mobiledata</span>
+                </button>
+                <button class="bg-black/40 border border-primary/20 p-3 rounded-xl hover:bg-primary/10 transition-all">
+                    <span class="material-symbols-outlined text-primary">apple</span>
+                </button>
+                <button class="bg-black/40 border border-primary/20 p-3 rounded-xl hover:bg-primary/10 transition-all">
+                    <span class="material-symbols-outlined text-primary">fingerprint</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- footer note -->
+        <p class="text-center text-xs text-slate-600 mt-8">© 2026 DeepVerify · secure neural gateway</p>
     </div>
-    <a href="/login"
-   class="bg-primary hover:brightness-110 text-background-dark px-6 py-2 rounded font-bold text-sm tracking-wide transition-all duration-300 hover:scale-110 hover:shadow-[0_0_40px_rgba(0,233,250,0.6)] animate-pulse-gpu-accelerated inline-block text-center">
-   Sign Up
-</a>
- 
-  </div>
-</nav>
 
-<main class="pt-20 sm:pt-24"></main>
-  <!-- HeroSection -->
-  <section class="max-w-7xl mx-auto px-6 lg:px-20 py-16 lg:py-28 flex flex-col lg:flex-row items-center gap-16">
-    <div class="flex-1 space-y-8">
-      <div class="inline-block px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-widest uppercase animate-fadeInUp"> Version 4.2 Neural Core Live </div>
-      <h1 class="text-5xl lg:text-7xl font-bold leading-[1.1] tracking-tighter italic animate-fadeInUp delay-1"> Restoring <span class="text-primary not-italic relative group"> Trust <span class="absolute -inset-1 bg-primary/20 blur-lg group-hover:blur-xl transition-all duration-500 opacity-0 group-hover:opacity-100"></span> </span> in the Digital Era </h1>
-      <p class="text-slate-400 text-lg max-w-xl leading-relaxed animate-fadeInUp delay-2"> State-of-the-art neural scanning to identify synthetic media in milliseconds. Protect your brand with enterprise-grade deepfake detection and biometric verification. </p>
-      <div class="flex flex-wrap gap-4 pt-4 animate-fadeInUp delay-3">
-      <a href="/login"
-   class="bg-primary text-background-dark px-8 py-4 rounded-lg font-bold text-base transition-all duration-300 hover:scale-110 hover:shadow-[0_0_40px_rgba(0,233,250,0.6)] inline-block text-center">
-   Login To Start
-</a>
-        <button id="watchDemoBtn" class="bg-white/5 border border-white/10 px-8 py-4 rounded-lg font-bold text-base hover:bg-white/10 transition-all duration-300 flex items-center gap-2 hover:scale-105 hover:border-primary/30 group">
-          <span class="material-symbols-outlined group-hover:scale-110 transition-transform">play_circle</span> Watch Demo
-        </button>
-      </div>
-      <div class="flex items-center gap-6 pt-8 grayscale opacity-50 animate-fadeInUp delay-4">
-        <!-- Fix: "Inspired by" instead of "In partnership with" -->
-        <div class="text-xs uppercase tracking-widest font-bold">Inspired by</div>
-        <div class="flex gap-4">
-          <span class="font-bold text-xl tracking-tighter hover:scale-110 hover:opacity-100 transition-all duration-300 cursor-default">SECURE.IO</span>
-          <span class="font-bold text-xl tracking-tighter hover:scale-110 hover:opacity-100 transition-all duration-300 cursor-default">BLOCK-SYNC</span>
-        </div>
-      </div>
-    </div>
-    <div class="flex-1 relative w-full aspect-square max-w-md lg:max-w-none">
-      <div class="absolute inset-0 bg-primary/20 rounded-full blur-[120px] animate-pulse-glow"></div>
-      <div class="relative w-full h-full rounded-2xl border border-primary/30 overflow-hidden glass-morphism group hover:border-primary/60 transition-all duration-700 hover:scale-[1.02]">
-        <div class="scan-line animate-scan"></div>
-        <img 
-  src="https://images.unsplash.com/photo-1531747118685-ca8fa6e08806?ixlib=rb-4.0.3&auto=format&fit=crop&w=1992&q=80"
-  alt="AI facial recognition and deepfake detection visualization"
-  loading="lazy"
-  class="w-full h-full object-cover opacity-90 grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-110"
-/>
-   <div class="absolute top-4 left-4 p-3 glass-morphism rounded-lg border border-primary/20 backdrop-blur-xl transform transition-all duration-500 hover:scale-110 hover:border-primary/40 hover:shadow-[0_0_20px_rgba(0,233,250,0.3)] animate-float">
-          <div class="text-[10px] text-primary font-bold uppercase mb-1">Authenticity</div>
-          <div class="text-2xl font-bold">99.8%</div>
-        </div>
-        <div class="absolute bottom-4 right-4 p-3 glass-morphism animate-float-reverse"></div>
-        <div class="text-[10px] text-red-400 font-bold uppercase mb-1">Synthetics Detected</div>
-          <div class="text-2xl font-bold">0.02%</div>
-        </div>
-      </div>
-    </div>
-  </section>
+    <script>
+        // Tab switching between login and signup
+        const loginTab = document.getElementById('loginTabBtn');
+        const signupTab = document.getElementById('signupTabBtn');
+        const loginFormDiv = document.getElementById('loginForm');
+        const signupFormDiv = document.getElementById('signupForm');
+        const switchToLoginBtn = document.getElementById('switchToLogin');
 
-  <!-- SectionHeader: Trusted By -> Inspired By fix applied -->
-  <section class="py-12 border-y border-white/5 bg-white/[0.02] overflow-hidden">
-    <div class="max-w-7xl mx-auto px-6">
-      <p class="text-center text-xs font-bold uppercase tracking-[0.3em] text-slate-500 mb-8 animate-fadeIn">Defending the world's leading infrastructures</p>
-      <div class="flex overflow-hidden">
-        <div class="flex animate-marquee gap-12 lg:gap-24 opacity-40 grayscale contrast-125">
-          <div class="text-2xl font-black italic tracking-tighter hover:scale-125 hover:opacity-100 hover:grayscale-0 transition-all duration-500 cursor-default mx-6">CYBER-GEN</div>
-          <div class="text-2xl font-black italic tracking-tighter hover:scale-125 hover:opacity-100 hover:grayscale-0 transition-all duration-500 cursor-default mx-6">NEURAL-LINK</div>
-          <div class="text-2xl font-black italic tracking-tighter hover:scale-125 hover:opacity-100 hover:grayscale-0 transition-all duration-500 cursor-default mx-6">QUANTUM-SEC</div>
-          <div class="text-2xl font-black italic tracking-tighter hover:scale-125 hover:opacity-100 hover:grayscale-0 transition-all duration-500 cursor-default mx-6">VOX-MEDIA</div>
-          <div class="text-2xl font-black italic tracking-tighter hover:scale-125 hover:opacity-100 hover:grayscale-0 transition-all duration-500 cursor-default mx-6">DATAVIZ</div>
-          <div class="text-2xl font-black italic tracking-tighter hover:scale-125 hover:opacity-100 hover:grayscale-0 transition-all duration-500 cursor-default mx-6">CYBER-GEN</div>
-          <div class="text-2xl font-black italic tracking-tighter hover:scale-125 hover:opacity-100 hover:grayscale-0 transition-all duration-500 cursor-default mx-6">NEURAL-LINK</div>
-          <div class="text-2xl font-black italic tracking-tighter hover:scale-125 hover:opacity-100 hover:grayscale-0 transition-all duration-500 cursor-default mx-6">QUANTUM-SEC</div>
-          <div class="text-2xl font-black italic tracking-tighter hover:scale-125 hover:opacity-100 hover:grayscale-0 transition-all duration-500 cursor-default mx-6">VOX-MEDIA</div>
-          <div class="text-2xl font-black italic tracking-tighter hover:scale-125 hover:opacity-100 hover:grayscale-0 transition-all duration-500 cursor-default mx-6">DATAVIZ</div>
-        </div>
-      </div>
-    </div>
-  </section>
+        function setActiveTab(tab) {
+            // reset both tabs
+            loginTab.classList.remove('tab-active', 'text-primary');
+            signupTab.classList.remove('tab-active', 'text-primary');
+            loginTab.classList.add('text-slate-400');
+            signupTab.classList.add('text-slate-400');
 
-  <!-- FeatureSection: How It Works -->
-  <section class="max-w-7xl mx-auto px-6 lg:px-20 py-24">
-    <div class="grid lg:grid-cols-3 gap-12">
-      <div class="lg:col-span-1 space-y-6">
-        <h2 class="text-4xl lg:text-5xl font-bold tracking-tight italic animate-fadeInUp">How <span class="text-primary italic relative group"> Verification <span class="absolute -inset-1 bg-primary/20 blur-lg scale-150 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></span> </span> Works</h2>
-        <p class="text-slate-200 leading-relaxed animate-fadeInUp delay-1">Our three-step neural verification process ensures maximum accuracy and forensic security for every frame of content.</p>
-        <div class="p-6 rounded-xl bg-primary/5 border border-primary/10 hover:border-primary/30 transition-all duration-500 hover:scale-105 hover:shadow-[0_0_30px_rgba(0,233,250,0.15)] animate-fadeInUp delay-2">
-          <h4 class="text-white font-bold mb-2">Real-time Dashboard</h4>
-          <p class="text-sm text-slate-200">All results are populated into our proprietary Forensic Console for deep-dive analysis.</p>
-        </div>
-      </div>
-      <div class="lg:col-span-2 grid md:grid-cols-3 gap-6">
-        <div class="group p-8 rounded-xl bg-surface border border-white/5 transition-all duration-500 hover:border-primary/50 hover:scale-105 hover:shadow-[0_0_40px_rgba(0,233,250,0.1)] animate-fadeInUp delay-1">
-          <div class="w-12 h-12 rounded bg-primary/20 flex items-center justify-center text-primary mb-6 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500"> <span class="material-symbols-outlined group-hover:animate-bounce-subtle">upload_file</span> </div>
-          <h3 class="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Upload Media</h3>
-          <p class="text-slate-200 text-sm leading-relaxed">Securely ingest high-resolution video, images, or audio streams into our sandbox environment.</p>
-        </div>
-        <div class="group p-8 rounded-xl bg-surface border border-white/5 transition-all duration-500 hover:border-primary/50 hover:scale-105 hover:shadow-[0_0_40px_rgba(0,233,250,0.1)] animate-fadeInUp delay-2">
-          <div class="w-12 h-12 rounded bg-primary/20 flex items-center justify-center text-primary mb-6 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500"> <span class="material-symbols-outlined group-hover:animate-bounce-subtle">psychology</span> </div>
-          <h3 class="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Neural Scan</h3>
-          <p class="text-slate-200 text-sm leading-relaxed">Multi-layer transformers analyze micro-expressions, skin-texture noise, and lighting inconsistencies.</p>
-        </div>
-        <div class="group p-8 rounded-xl bg-surface border border-white/5 transition-all duration-500 hover:border-primary/50 hover:scale-105 hover:shadow-[0_0_40px_rgba(0,233,250,0.1)] animate-fadeInUp delay-3">
-          <div class="w-12 h-12 rounded bg-primary/20 flex items-center justify-center text-primary mb-6 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500"> <span class="material-symbols-outlined group-hover:animate-bounce-subtle">description</span> </div>
-          <h3 class="text-xl font-bold mb-3 group-hover:text-primary transition-colors">Audit Report</h3>
-          <p class="text-slate-200 text-sm leading-relaxed">Download a cryptographically signed verification report valid for legal and forensic proceedings.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+            if (tab === 'login') {
+                loginTab.classList.add('tab-active', 'text-primary');
+                loginTab.classList.remove('text-slate-400');
+                loginFormDiv.classList.remove('hidden');
+                signupFormDiv.classList.add('hidden');
+            } else {
+                signupTab.classList.add('tab-active', 'text-primary');
+                signupTab.classList.remove('text-slate-400');
+                signupFormDiv.classList.remove('hidden');
+                loginFormDiv.classList.add('hidden');
+            }
+        }
 
-  <!-- Bento Grid Features -->
-  <section class="max-w-7xl mx-auto px-6 lg:px-20 py-24 border-t border-white/5">
-    <div class="grid ..."></div>
-      <div class="md:col-span-2 md:row-span-2 glass-morphism rounded-2xl p-10 flex flex-col justify-end border border-white/10 group overflow-hidden transition-all duration-700 hover:border-primary/30 hover:scale-[1.02] hover:shadow-[0_0_60px_rgba(0,233,250,0.15)] animate-fadeInUp">
-        <div class="absolute top-0 right-0 p-10 opacity-10 group-hover:opacity-30 transition-all duration-700 group-hover:scale-125"> <span class="material-symbols-outlined text-[60px] md:text-[90px] lg:text-[120px]"></span> </div>
-        <h3 class="text-3xl font-bold mb-4 tracking-tighter italic group-hover:text-primary transition-colors">Liveness Detection</h3>
-        <p class="text-slate-200 max-w-sm mb-6">Our proprietary Liveness Engine detects subtle biometric pulses that AI-generated avatars cannot replicate.</p>
-        <div class="flex gap-2">
-          <span class="px-3 py-1 bg-white/5 rounded text-xs border border-white/10 hover:bg-primary/20 hover:border-primary/30 transition-all duration-300 cursor-default">Pulse Sensing</span>
-          <span class="px-3 py-1 bg-white/5 rounded text-xs border border-white/10 hover:bg-primary/20 hover:border-primary/30 transition-all duration-300 cursor-default">Micro-Expression Map</span>
-        </div>
-      </div>
-      <div class="md:col-span-2 glass-morphism rounded-2xl p-8 border border-white/10 flex items-center gap-6 transition-all duration-500 hover:border-primary/30 hover:scale-105 hover:shadow-[0_0_40px_rgba(0,233,250,0.1)] animate-fadeInUp delay-1">
-        <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0 group hover:bg-primary/30 transition-all duration-500"> <span class="material-symbols-outlined group-hover:scale-125 group-hover:rotate-12 transition-all duration-500">bolt</span> </div>
-        <div> <h3 class="text-xl font-bold mb-1 group-hover:text-primary transition-colors">Millisecond Latency</h3> <p class="text-slate-400 text-sm">Enterprise API built for real-time live-streaming platforms.</p> </div>
-      </div>
-      <div class="glass-morphism rounded-2xl p-8 border border-white/10 flex flex-col justify-between transition-all duration-500 hover:border-primary/30 hover:scale-105 hover:shadow-[0_0_40px_rgba(0,233,250,0.1)] group animate-fadeInUp delay-2">
-        <span class="material-symbols-outlinedtext-5xl md:text-7xl lg:text-[120px] transition-all duration-500">security</span>
-        <h3 class="font-bold group-hover:text-primary transition-colors">E2E Encryption</h3>
-      </div>
-      <div class="glass-morphism rounded-2xl p-8 border border-white/10 bg-primary/5 flex flex-col justify-between group cursor-pointer transition-all duration-500 hover:bg-primary/10 hover:border-primary/30 hover:scale-105 hover:shadow-[0_0_40px_rgba(0,233,250,0.2)] animate-fadeInUp delay-3">
-        <span class="material-symbols-outlined text-primary group-hover:translate-x-2 transition-transform duration-300">arrow_forward</span>
-        <h3 class="font-bold group-hover:text-primary transition-colors">Explore API Docs</h3>
-      </div>
-    </div>
-  </section>
+        loginTab.addEventListener('click', () => setActiveTab('login'));
+        signupTab.addEventListener('click', () => setActiveTab('signup'));
 
-  <!-- Call to Action -->
-  <section class="max-w-7xl mx-auto px-6 lg:px-20 py-24">
-    <div class="relative bg-primary p-12 lg:p-20 rounded-[2rem] overflow-hidden text-background-dark group">
-      <div class="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-white/20 rounded-full blur-[80px] animate-pulse-gpu-accelerated"></div>
-      <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-white/20 rounded-full blur-[80px] animate-pulse-gpu-accelerated" style="animation-delay: 1s;"></div>
-      <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
-        <div class="max-w-2xl text-center lg:text-left animate-fadeInUp">
-          <h2 class="text-4xl lg:text-6xl font-black italic tracking-tighter mb-6 transform transition-transform group-hover:scale-105 duration-700">Ready to verify your future?</h2>
-          <p class="text-lg font-medium opacity-80">Join 500+ enterprises using DeepVerify to maintain digital integrity in an age of misinformation.</p>
-        </div>
-        <div class="flex flex-col sm:flex-row gap-4 shrink-0 animate-fadeInUp delay-2">
-          <button class="bg-background-dark text-white px-10 py-5 rounded-xl font-bold text-lg transition-all duration-500 hover:scale-110 hover:shadow-2xl hover:shadow-black/50 relative overflow-hidden group/btn">
-            <span class="relative z-10">Get Started Free</span>
-            <span class="absolute inset-0 bg-white/20 transform -translate-x-full group-hover/btn:translate-x-0 transition-transform duration-700"></span>
-          </button>
-          <button class="bg-white/20 backdrop-blur text-background-dark border border-background-dark/10 px-10 py-5 rounded-xl font-bold text-lg transition-all duration-500 hover:bg-white/30 hover:scale-110 hover:shadow-2xl hover:shadow-black/30"> Sales Enquiry </button>
-        </div>
-      </div>
-    </div>
-  </section>
+        if (switchToLoginBtn) {
+            switchToLoginBtn.addEventListener('click', () => setActiveTab('login'));
+        }
 
-  <!-- Footer -->
-  <footer class="max-w-7xl mx-auto px-6 lg:px-20 py-12 border-t border-white/5">
-    <div class="flex flex-col md:flex-row justify-between items-center gap-8">
-      <div class="flex items-center gap-3 group">
-        <div class="text-primary grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-110 group-hover:rotate-12">
-          <svg fill="none" height="24" viewbox="0 0 48 48" width="24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M47.2426 24L24 47.2426L0.757355 24L24 0.757355L47.2426 24ZM12.2426 21H35.7574L24 9.24264L12.2426 21Z" fill="currentColor"></path>
-          </svg>
-        </div>
-        <span class="text-sm font-bold tracking-widest text-slate-500 uppercase group-hover:text-primary transition-colors duration-500">© 2024 DEEPVERIFY CORE. ALL RIGHTS RESERVED.</span>
-      </div>
-      <div class="flex gap-8 text-xs font-bold uppercase tracking-widest text-slate-500">
-        <a class="hover:text-primary transition-all duration-300 hover:scale-110 inline-block" href=title="Privacy Protocol">Privacy Protocol</a>
-        <a class="hover:text-primary transition-all duration-300 hover:scale-110 inline-block" href=title="Terms of Servic">Terms of Service</a>
-        <a class="hover:text-primary transition-all duration-300 hover:scale-110 inline-block" href=title="Forensic Standards">Forensic Standards</a>
-      </div>
-    </div>
-  </footer>
-</main>
+        // // simulate login action -> redirect to "scanning / verification" page
+        // function handleLogin() {
+        //     // simple validation dummy (just for demo)
+        //     const email = document.getElementById('loginEmail')?.value;
+        //     const pwd = document.getElementById('loginPassword')?.value;
+        //     if (!email || !pwd) {
+        //         alert('please fill in both fields (demo: any credentials work)');
+        //         return;
+        //     }
+        //     // redirect to the scanning page (we'll open in same window)
+        //     window.location.href = 'scanning.html'; // assuming scanning page exists, but for demo we can show alert + fake redirect
+        //     // if you want to simulate, we can show message and replace content (but we'll redirect to a placeholder)
+        //     // For this demo, we'll use a fallback: since scanning page might not exist, we show alert and then simulate.
+        //     alert('login successful! redirecting to neural scan hub... (demo)');
+        //     // optional: replace page with a simple message or open the scanning code (we could embed an iframe but better to just pretend)
+        //     // In context of this task we output a separate scanning page. We can simulate by opening a new page.
+        //     // For now we do a window.location to a relative 'scanning.html' – if not present, we display message.
+        //     // To keep it self-contained, we'll redirect to a generated scanning page using a data URI? better show alert.
+        //     // We'll just display a success message and change body text (simple demo).
+        //     document.body.innerHTML = `<div class="min-h-screen flex items-center justify-center text-primary text-xl">✅ redirecting to deepfake scanner ... (login mock)</div>`;
+        //     setTimeout(() => { window.location.href = 'about:blank'; }, 1500); // just for fun, avoid.
+        // }
 
-<!-- Demo Video Modal -->
-<div id="demoModal"
-     class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50 overflow-auto"
-     role="dialog"Forensic Standard
-     aria-modal="true"
-     aria-labelledby="demoModalTitle">
-<div class="relative w-[95%] max-w-6xl bg-black rounded-2xl p-8">
-    <button id="closeModal" class="absolute top-4 right-4 text-white text-2xl"> ✕ </button>
-    <h2 id="demoModalTitle"
-    class="text-2xl font-bold text-white mb-6 text-center">
-    <div class="grid md:grid-cols-3 gap-6">
-      <iframe class="w-full h-[250px] rounded-xl" src="https://www.youtube.com/embed/llVoaZXtvEo" title="Deepfake Detection Demo Video 1" frameborder="0" allowfullscreen> </iframe>
-      <iframe class="w-full h-[250px] rounded-xl" src="https://www.youtube.com/embed/3LN1J_EISB8" title="Deepfake Detection Demo Video 2" frameborder="0" allowfullscreen> </iframe>
-      <iframe class="w-full h-[250px] rounded-xl" src="https://www.youtube.com/embed/WzK1MBEpkJ0" title="Deepfake Detection Demo Video 3" frameborder="0" allowfullscreen> </iframe>
-    </div>
-  </div>
-</div>
+        // function handleSignup() {
+        //     const name = document.getElementById('signupName')?.value;
+        //     const email = document.getElementById('signupEmail')?.value;
+        //     const pwd = document.getElementById('signupPassword')?.value;
+        //     const confirm = document.getElementById('signupConfirm')?.value;
+        //     if (!name || !email || !pwd || !confirm) {
+        //         alert('please fill all fields');
+        //         return;
+        //     }
+        //     if (pwd !== confirm) {
+        //         alert('passwords do not match');
+        //         return;
+        //     }
+        //     alert('account created! redirecting to verification... (demo)');
+        //     // similar redirect simulation
+        //     document.body.innerHTML = `<div class="min-h-screen flex items-center justify-center text-primary text-xl">✅ account created · redirecting to neural scan ...</div>`;
+        // }
 
-<script>
-  (function() {
-    // modal handling
-    const watchBtn = document.getElementById('watchDemoBtn');
-    const modal = document.getElementById('demoModal');
-    const closeBtn = document.getElementById('closeModal');
-    if (watchBtn && modal && closeBtn) {
-      watchBtn.addEventListener('click', () => modal.classList.remove('hidden'));
-     closeBtn.addEventListener('click', () => {
-  modal.classList.add('hidden');
-
-  // stop all videos
-  document.querySelectorAll('#demoModal iframe').forEach(iframe => {
-    iframe.src = iframe.src;
-  });
-});
-      window.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
-    }
+        // // make functions global for onclick
+        // window.handleLogin = handleLogin;
+        // window.handleSignup = handleSignup;
     
-    // Dark mode toggle functionality (alignment fix + behavior)
-    
-      const toggleSwitch = document.getElementById('darkModeToggle');
-const htmlElement = document.documentElement;
 
-// Apply theme on load
-const savedTheme = localStorage.getItem('theme');
+async function handleLogin() {
+    const email = document.getElementById('loginEmail').value;
+    const pwd   = document.getElementById('loginPassword').value;
+    if (!email || !pwd) { alert('Fill in all fields'); return; }
 
-if (savedTheme) {
-  htmlElement.classList.toggle('dark', savedTheme === 'dark');
-} else {
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  htmlElement.classList.toggle('dark', prefersDark);
-}
+    const res  = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pwd })
+    });
+    const data = await res.json();
 
-// Toggle manually
-toggleSwitch.addEventListener('click', () => {
-  const isDark = htmlElement.classList.toggle('dark');
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
-});
+    if (data.success) {
+        window.location.href = data.redirect;
+    } else {
+        alert(data.error || 'Login failed');
     }
-  )();
-  "javascript:void(0)"
-  function isLoggedIn() {
-  return localStorage.getItem("isLoggedIn") === "true";
 }
 
-function handleProtectedRoute(page) {
-  if (isLoggedIn()) {
-    window.location.href = page;
-  } else {
-    alert("Please login first!");
-    window.location.href = "/login";
-  }
+async function handleSignup() {
+    const name    = document.getElementById('signupName').value;
+    const email   = document.getElementById('signupEmail').value;
+    const pwd     = document.getElementById('signupPassword').value;
+    const confirm = document.getElementById('signupConfirm').value;
+
+    if (!name || !email || !pwd || !confirm) { alert('Fill in all fields'); return; }
+    if (pwd !== confirm) { alert('Passwords do not match'); return; }
+
+    const res  = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password: pwd })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+        window.location.href = data.redirect;
+    } else {
+        alert(data.error || 'Signup failed');
+    }
 }
-</script>
+
+    </script>
 </body>
 </html>
