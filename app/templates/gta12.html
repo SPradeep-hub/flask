@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>GTA 12 - Crime Spree: Vice City Mayhem</title>
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a0f1e 0%, #0b1525 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', 'VT323', 'Orbitron', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: #000000aa;
+            border-radius: 32px;
+            padding: 20px;
+            backdrop-filter: blur(3px);
+            box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+            border: 1px solid #f5a62355;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 20px;
+            box-shadow: 0 0 0 3px #ffb347, 0 0 0 8px #1e1a0f;
+            cursor: none;
+            background: #1a2a32;
+        }
+
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #010101cc;
+            backdrop-filter: blur(8px);
+            margin-top: 18px;
+            padding: 12px 20px;
+            border-radius: 60px;
+            color: #ffd966;
+            text-shadow: 0 0 4px #ff6600;
+            border: 1px solid #ffb347;
+            font-weight: bold;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 32px;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            background: #00000088;
+            padding: 5px 18px;
+            border-radius: 40px;
+        }
+
+        .stats span {
+            color: #f0f0f0;
+            background: #222;
+            padding: 4px 12px;
+            border-radius: 32px;
+            margin-left: 8px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .wanted-stars {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            background: #2c1a0f;
+            padding: 6px 18px;
+            border-radius: 40px;
+        }
+
+        .star {
+            font-size: 28px;
+            color: #4a3b2a;
+            transition: 0.1s;
+        }
+
+        .star.active {
+            color: #ffcc00;
+            text-shadow: 0 0 8px #ff9900;
+        }
+
+        button {
+            background: #d42e12;
+            border: none;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 6px 20px;
+            border-radius: 60px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #641e0a;
+            transition: 0.07s linear;
+        }
+
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #641e0a;
+        }
+
+        .controls-tip {
+            font-size: 0.75rem;
+            background: #1f1a0e;
+            padding: 4px 15px;
+            border-radius: 20px;
+            color: #ffbe76;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        .game-over-tag {
+            animation: pulse 0.8s infinite;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="1000" height="600"></canvas>
+        <div class="info-panel">
+            <div class="stats">
+                💰 CASH: <span id="scoreValue">0</span>
+                ❤️ HEALTH: <span id="healthValue">100</span>
+            </div>
+            <div class="wanted-stars" id="starContainer">
+                ⭐ <span>WANTED</span>
+                <div id="starList" style="display: flex; gap: 4px;">⭐</div>
+            </div>
+            <button id="resetButton">🔫 RESTART HEIST</button>
+            <div class="controls-tip">🕹️ WASD / ARROWS | 💰 STEAL MONEY | 🚔 ESCAPE COPS</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        // ------------------- CANVAS -------------------
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // ------------------- GAME DIMENSIONS -------------------
+        const W = 1000, H = 600;
+
+        // ------------------- GAME STATE -------------------
+        let gameRunning = true;
+        let animationId = null;
+        
+        // Player
+        let player = {
+            x: 500, y: 300,
+            width: 34, height: 34,
+            health: 100,
+            invincibleTimer: 0,   // frames of invincibility after hit
+            color: '#E34234'      // muscle red
+        };
+        
+        let score = 0;            // cash money
+        let wantedLevel = 0;      // 0 to 5
+        
+        // Police enemies array
+        let police = [];
+        
+        // Loot / Money pickups
+        let pickups = [];
+        
+        // Obstacles (buildings / barriers)
+        let obstacles = [
+            { x: 80, y: 80, w: 100, h: 100 },
+            { x: 820, y: 70, w: 110, h: 90 },
+            { x: 150, y: 480, w: 120, h: 85 },
+            { x: 750, y: 450, w: 130, h: 100 },
+            { x: 420, y: 220, w: 85, h: 85 },
+            { x: 540, y: 430, w: 90, h: 80 },
+            { x: 280, y: 330, w: 70, h: 120 },
+            { x: 700, y: 260, w: 95, h: 95 }
+        ];
+        
+        // Spawn timers
+        let policeSpawnCounter = 0;
+        let moneySpawnCounter = 0;
+        
+        // Max police based on wanted level
+        function getMaxPolice() {
+            return Math.min(9, 2 + wantedLevel);
+        }
+        
+        // Police base speed (scales with wanted)
+        function getPoliceBaseSpeed() {
+            return 1.45 + (wantedLevel * 0.38);
+        }
+        
+        // Helper: random range
+        function rand(min, max) {
+            return min + Math.random() * (max - min);
+        }
+        
+        // Spawn a police cruiser at a safe edge position (avoid overlapping obstacles & player)
+        function spawnPolice() {
+            if (!gameRunning) return;
+            if (police.length >= getMaxPolice()) return;
+            
+            let side = Math.floor(Math.random() * 4); // 0:left,1:right,2:top,3:bottom
+            let spawnX, spawnY;
+            let attempts = 0;
+            let safe = false;
+            
+            while (!safe && attempts < 30) {
+                if (side === 0) { // left
+                    spawnX = -15;
+                    spawnY = rand(20, H - 50);
+                } else if (side === 1) { // right
+                    spawnX = W + 5;
+                    spawnY = rand(20, H - 50);
+                } else if (side === 2) { // top
+                    spawnX = rand(20, W - 50);
+                    spawnY = -15;
+                } else {
+                    spawnX = rand(20, W - 50);
+                    spawnY = H + 5;
+                }
+                // clamp to valid range after edge
+                let testX = Math.min(W - 30, Math.max(10, spawnX));
+                let testY = Math.min(H - 30, Math.max(10, spawnY));
+                let collideObstacle = false;
+                for (let obs of obstacles) {
+                    if (testX < obs.x + obs.w && testX + 32 > obs.x && testY < obs.y + obs.h && testY + 32 > obs.y) {
+                        collideObstacle = true;
+                        break;
+                    }
+                }
+                let distToPlayer = Math.hypot(testX - player.x, testY - player.y);
+                if (!collideObstacle && distToPlayer > 90) {
+                    safe = true;
+                    spawnX = testX;
+                    spawnY = testY;
+                }
+                side = (side + 1) % 4;
+                attempts++;
+            }
+            if (!safe) {
+                spawnX = rand(40, W-70);
+                spawnY = rand(40, H-70);
+            }
+            police.push({
+                x: Math.min(W - 32, Math.max(5, spawnX)),
+                y: Math.min(H - 32, Math.max(5, spawnY)),
+                width: 34, height: 34,
+                color: '#1E3A6F'
+            });
+        }
+        
+        // Spawn money bag
+        function spawnMoney() {
+            if (!gameRunning) return;
+            if (pickups.length >= 8) return;
+            let attempts = 0;
+            let placed = false;
+            let mx, my;
+            while (!placed && attempts < 35) {
+                mx = rand(35, W - 45);
+                my = rand(35, H - 45);
+                let collide = false;
+                for (let obs of obstacles) {
+                    if (mx < obs.x + obs.w + 15 && mx + 20 > obs.x - 15 && my < obs.y + obs.h + 15 && my + 20 > obs.y - 15) {
+                        collide = true;
+                        break;
+                    }
+                }
+                let nearPolice = police.some(p => Math.hypot(p.x - mx, p.y - my) < 55);
+                let nearPlayer = Math.hypot(player.x - mx, player.y - my) < 65;
+                if (!collide && !nearPolice && !nearPlayer) placed = true;
+                attempts++;
+            }
+            pickups.push({
+                x: mx, y: my, w: 18, h: 18,
+                value: 10
+            });
+        }
+        
+        // Update wanted level based on score
+        function updateWantedLevel() {
+            let newWanted = Math.min(5, Math.floor(score / 100));
+            if (newWanted !== wantedLevel) {
+                wantedLevel = newWanted;
+                // optional: police instantly get more aggressive – adjust count by respawn
+                while (police.length > getMaxPolice() && police.length > 0) {
+                    police.pop();
+                }
+            }
+        }
+        
+        // Collision rect
+        function rectCollide(r1, r2) {
+            return !(r2.x > r1.x + r1.w ||
+                r2.x + r2.w < r1.x ||
+                r2.y > r1.y + r1.h ||
+                r2.y + r2.h < r1.y);
+        }
+        
+        // Player collision with obstacles (returns new position if adjusted)
+        function handlePlayerCollisionWithObstacles(newX, newY) {
+            let pRect = {x: newX, y: newY, w: player.width, h: player.height};
+            for (let obs of obstacles) {
+                let obsRect = {x: obs.x, y: obs.y, w: obs.w, h: obs.h};
+                if (rectCollide(pRect, obsRect)) {
+                    // push away - simple resolution
+                    let overlapLeft = (newX + player.width) - obs.x;
+                    let overlapRight = (obs.x + obs.w) - newX;
+                    let overlapTop = (newY + player.height) - obs.y;
+                    let overlapBottom = (obs.y + obs.h) - newY;
+                    
+                    let minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+                    if (minOverlap === overlapLeft) newX = obs.x - player.width;
+                    else if (minOverlap === overlapRight) newX = obs.x + obs.w;
+                    else if (minOverlap === overlapTop) newY = obs.y - player.height;
+                    else if (minOverlap === overlapBottom) newY = obs.y + obs.h;
+                    pRect.x = newX; pRect.y = newY;
+                }
+            }
+            // boundaries
+            newX = Math.min(W - player.width, Math.max(0, newX));
+            newY = Math.min(H - player.height, Math.max(0, newY));
+            return {x: newX, y: newY};
+        }
+        
+        // Police vs obstacles (simple repulse)
+        function handlePoliceCollision(p, newX, newY) {
+            let pRect = {x: newX, y: newY, w: p.width, h: p.height};
+            for (let obs of obstacles) {
+                let obsRect = {x: obs.x, y: obs.y, w: obs.w, h: obs.h};
+                if (rectCollide(pRect, obsRect)) {
+                    let overlapLeft = (newX + p.width) - obs.x;
+                    let overlapRight = (obs.x + obs.w) - newX;
+                    let overlapTop = (newY + p.height) - obs.y;
+                    let overlapBottom = (obs.y + obs.h) - newY;
+                    let minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+                    if (minOverlap === overlapLeft) newX = obs.x - p.width;
+                    else if (minOverlap === overlapRight) newX = obs.x + obs.w;
+                    else if (minOverlap === overlapTop) newY = obs.y - p.height;
+                    else newY = obs.y + obs.h;
+                    pRect.x = newX; pRect.y = newY;
+                }
+            }
+            newX = Math.min(W - p.width, Math.max(0, newX));
+            newY = Math.min(H - p.height, Math.max(0, newY));
+            return {x: newX, y: newY};
+        }
+        
+        // Player input handling
+        const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, w: false, s: false, a: false, d: false };
+        
+        function handleInput() {
+            if (!gameRunning) return;
+            let moveX = 0, moveY = 0;
+            let speed = 5.2;
+            if (keys.ArrowUp || keys.w) moveY -= 1;
+            if (keys.ArrowDown || keys.s) moveY += 1;
+            if (keys.ArrowLeft || keys.a) moveX -= 1;
+            if (keys.ArrowRight || keys.d) moveX += 1;
+            if (moveX !== 0 || moveY !== 0) {
+                let len = Math.hypot(moveX, moveY);
+                moveX = moveX / len * speed;
+                moveY = moveY / len * speed;
+            }
+            let newX = player.x + moveX;
+            let newY = player.y + moveY;
+            let corrected = handlePlayerCollisionWithObstacles(newX, newY);
+            player.x = corrected.x;
+            player.y = corrected.y;
+        }
+        
+        // Police AI movement (chase player + obstacle avoidance)
+        function updatePolice() {
+            let policeSpeed = getPoliceBaseSpeed();
+            for (let i = 0; i < police.length; i++) {
+                let p = police[i];
+                let dx = player.x - p.x;
+                let dy = player.y - p.y;
+                let dist = Math.hypot(dx, dy);
+                if (dist > 0.01) {
+                    let move = policeSpeed;
+                    let stepX = (dx / dist) * move;
+                    let stepY = (dy / dist) * move;
+                    let newX = p.x + stepX;
+                    let newY = p.y + stepY;
+                    let resolved = handlePoliceCollision(p, newX, newY);
+                    p.x = resolved.x;
+                    p.y = resolved.y;
+                }
+            }
+        }
+        
+        // Collisions: Player vs Police (damage & knockback)
+        function handlePlayerPoliceCollision() {
+            if (!gameRunning) return;
+            for (let i = 0; i < police.length; i++) {
+                let cop = police[i];
+                if (rectCollide(
+                    {x: player.x, y: player.y, w: player.width, h: player.height},
+                    {x: cop.x, y: cop.y, w: cop.width, h: cop.height}
+                )) {
+                    if (player.invincibleTimer <= 0) {
+                        player.health -= 12;
+                        player.invincibleTimer = 28;  // invinc frames
+                        // knockback away from cop
+                        let angle = Math.atan2(player.y - cop.y, player.x - cop.x);
+                        let knockX = Math.cos(angle) * 45;
+                        let knockY = Math.sin(angle) * 45;
+                        let newX = player.x + knockX;
+                        let newY = player.y + knockY;
+                        let corrected = handlePlayerCollisionWithObstacles(newX, newY);
+                        player.x = corrected.x;
+                        player.y = corrected.y;
+                        // clamp again
+                        player.x = Math.min(W - player.width, Math.max(0, player.x));
+                        player.y = Math.min(H - player.height, Math.max(0, player.y));
+                        
+                        if (player.health <= 0) {
+                            gameRunning = false;
+                            player.health = 0;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        
+        // Money pickups
+        function handlePickups() {
+            for (let i=0; i<pickups.length; i++) {
+                let pUp = pickups[i];
+                if (rectCollide(
+                    {x: player.x, y: player.y, w: player.width, h: player.height},
+                    {x: pUp.x, y: pUp.y, w: pUp.w, h: pUp.h}
+                )) {
+                    score += pUp.value;
+                    pickups.splice(i,1);
+                    i--;
+                    updateWantedLevel();
+                    // health small bonus?
+                    if (player.health < 100) player.health = Math.min(100, player.health + 3);
+                }
+            }
+        }
+        
+        // Timers: spawn police & money
+        function updateSpawners() {
+            if (!gameRunning) return;
+            // police spawn interval
+            policeSpawnCounter++;
+            let spawnDelay = Math.max(35, 70 - (wantedLevel * 6));
+            if (policeSpawnCounter > spawnDelay && police.length < getMaxPolice()) {
+                spawnPolice();
+                policeSpawnCounter = 0;
+            }
+            // money spawn
+            moneySpawnCounter++;
+            if (moneySpawnCounter > 85 && pickups.length < 9) {
+                spawnMoney();
+                moneySpawnCounter = 0;
+            }
+        }
+        
+        // invincibility decrement
+        function updateTimers() {
+            if (player.invincibleTimer > 0) player.invincibleTimer--;
+        }
+        
+        // Health regen very slow when not in danger (just fun)
+        function passiveRegen() {
+            if (gameRunning && player.health < 100 && player.invincibleTimer === 0 && police.length < 3) {
+                player.health = Math.min(100, player.health + 0.1);
+            }
+        }
+        
+        // ---------- DRAW EVERYTHING (GTA 12 STYLE) ----------
+        function drawCity() {
+            // ground grid / asphalt
+            ctx.fillStyle = '#1e2b2c';
+            ctx.fillRect(0,0,W,H);
+            // road lines
+            ctx.strokeStyle = '#e6c229';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < W+50; i+= 60) {
+                ctx.beginPath();
+                ctx.setLineDash([20, 30]);
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i+30, H);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i%H);
+                ctx.lineTo(W, (i+20)%H);
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+            
+            // buildings (obstacles) with neon vibe
+            for (let obs of obstacles) {
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#ff990066';
+                ctx.fillStyle = '#2d2f36';
+                ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+                ctx.fillStyle = '#4e3b28';
+                ctx.fillRect(obs.x+5, obs.y+5, obs.w-10, obs.h-10);
+                ctx.fillStyle = '#ffb347';
+                ctx.font = "bold 20monospace";
+                ctx.fillText("🏢", obs.x+obs.w/2-12, obs.y+obs.h/2+6);
+                ctx.fillStyle = '#cab577';
+                ctx.fillRect(obs.x+12, obs.y+12, obs.w-24, 4);
+            }
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawPlayer() {
+            // flash when invincible
+            if (player.invincibleTimer > 0 && (Math.floor(Date.now()/50)%3 === 0)) {
+                ctx.fillStyle = '#ffffff';
+            } else {
+                ctx.fillStyle = '#E85D04';
+            }
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = '#ff6600';
+            ctx.beginPath();
+            ctx.roundRect(player.x, player.y, player.width, player.height, 8);
+            ctx.fill();
+            ctx.fillStyle = '#2c1a0e';
+            ctx.beginPath();
+            ctx.rect(player.x+5, player.y+8, 7, 7);
+            ctx.rect(player.x+player.width-12, player.y+8, 7, 7);
+            ctx.fill();
+            ctx.fillStyle = '#FFD966';
+            ctx.font = "bold 22 'Courier New'";
+            ctx.fillText("🏎️", player.x+9, player.y+27);
+            ctx.fillStyle = "white";
+            ctx.font = "bold 11 monospace";
+            ctx.fillText("GTA12", player.x+7, player.y-4);
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawPolice() {
+            for (let cop of police) {
+                ctx.fillStyle = '#1f3a6b';
+                ctx.shadowBlur = 6;
+                ctx.beginPath();
+                ctx.roundRect(cop.x, cop.y, cop.width, cop.height, 8);
+                ctx.fill();
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(cop.x+5, cop.y+6, 8, 8);
+                ctx.fillRect(cop.x+cop.width-13, cop.y+6, 8, 8);
+                ctx.fillStyle = '#ff3a3a';
+                ctx.beginPath();
+                ctx.moveTo(cop.x+17, cop.y+25);
+                ctx.lineTo(cop.x+10, cop.y+33);
+                ctx.lineTo(cop.x+24, cop.y+33);
+                ctx.fill();
+                ctx.fillStyle = "#aaccff";
+                ctx.font = "14px monospace";
+                ctx.fillText("🚨", cop.x+10, cop.y+20);
+            }
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawPickups() {
+            for (let m of pickups) {
+                ctx.fillStyle = '#F3C623';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = 'gold';
+                ctx.beginPath();
+                ctx.arc(m.x+9, m.y+9, 12, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#CA8A04';
+                ctx.font = "18px monospace";
+                ctx.fillText("💰", m.x+2, m.y+17);
+            }
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawUIonCanvas() {
+            // wanted stars on canvas top-right
+            ctx.font = "bold 20 'Courier New'";
+            ctx.fillStyle = "#0a0a0a";
+            ctx.fillRect(W-140, 12, 130, 38);
+            ctx.fillStyle = "#F5A623";
+            ctx.fillText("⭐ WANTED:", W-135, 40);
+            for (let i=0; i<5; i++) {
+                if (i < wantedLevel) ctx.fillStyle = "#ffcc33";
+                else ctx.fillStyle = "#4a3e2e";
+                ctx.fillText("★", W-35 + i*18, 42);
+            }
+            // health bar
+            ctx.fillStyle = '#411212';
+            ctx.fillRect(15, 15, 204, 18);
+            ctx.fillStyle = '#d64531';
+            let healthPercent = Math.max(0, player.health/100);
+            ctx.fillRect(15, 15, 200 * healthPercent, 18);
+            ctx.fillStyle = 'white';
+            ctx.font = "bold 14 monospace";
+            ctx.fillText(`❤️ ${Math.floor(player.health)}`, 25, 30);
+        }
+        
+        // roundRect helper
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                if (w < 2 * r) r = w / 2;
+                if (h < 2 * r) r = h / 2;
+                this.moveTo(x+r, y);
+                this.lineTo(x+w-r, y);
+                this.quadraticCurveTo(x+w, y, x+w, y+r);
+                this.lineTo(x+w, y+h-r);
+                this.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+                this.lineTo(x+r, y+h);
+                this.quadraticCurveTo(x, y+h, x, y+h-r);
+                this.lineTo(x, y+r);
+                this.quadraticCurveTo(x, y, x+r, y);
+                return this;
+            };
+        }
+        
+        // GAME OVER DRAW
+        function drawGameOverlay() {
+            if (!gameRunning) {
+                ctx.fillStyle = "#000000aa";
+                ctx.fillRect(0,0,W,H);
+                ctx.font = "800 44monospace";
+                ctx.fillStyle = "#ff4d4d";
+                ctx.shadowBlur = 0;
+                ctx.fillText("💀 GAME OVER 💀", W/2-180, H/2-40);
+                ctx.font = "22monospace";
+                ctx.fillStyle = "#ffbc6e";
+                ctx.fillText("PRESS [ RESTART HEIST ]", W/2-155, H/2+40);
+                ctx.fillStyle = "#eeeeaa";
+                ctx.font = "18 monospace";
+                ctx.fillText("⭐ TOTAL SCORE: "+score, W/2-95, H/2+100);
+            }
+        }
+        
+        // Update HTML stats
+        function updateUIHtml() {
+            document.getElementById('scoreValue').innerText = Math.floor(score);
+            document.getElementById('healthValue').innerText = Math.floor(player.health);
+            const starDiv = document.getElementById('starList');
+            starDiv.innerHTML = '';
+            for (let i=0; i<5; i++) {
+                let starSpan = document.createElement('span');
+                starSpan.style.fontSize = '24px';
+                starSpan.innerText = '★';
+                if (i < wantedLevel) starSpan.style.color = '#FFD966';
+                else starSpan.style.color = '#544d3a';
+                starDiv.appendChild(starSpan);
+            }
+        }
+        
+        // ----- GAME LOOP -----
+        function gameUpdate() {
+            if (gameRunning) {
+                handleInput();
+                updatePolice();
+                handlePlayerPoliceCollision();
+                handlePickups();
+                updateSpawners();
+                updateTimers();
+                passiveRegen();
+                updateWantedLevel();
+                // extra safety: if health <=0 stop game
+                if (player.health <= 0) {
+                    gameRunning = false;
+                }
+            }
+        }
+        
+        function render() {
+            drawCity();
+            drawPickups();
+            drawPolice();
+            drawPlayer();
+            drawUIonCanvas();
+            drawGameOverlay();
+            updateUIHtml();
+        }
+        
+        function gameLoop() {
+            gameUpdate();
+            render();
+            animationId = requestAnimationFrame(gameLoop);
+        }
+        
+        // ----- RESET FUNCTION -----
+        function resetGame() {
+            gameRunning = true;
+            player = {
+                x: 500, y: 300,
+                width: 34, height: 34,
+                health: 100,
+                invincibleTimer: 0,
+                color: '#E34234'
+            };
+            score = 0;
+            wantedLevel = 0;
+            police = [];
+            pickups = [];
+            policeSpawnCounter = 0;
+            moneySpawnCounter = 0;
+            // initial police and money
+            for(let i=0; i<2; i++) spawnPolice();
+            for(let i=0; i<3; i++) spawnMoney();
+            updateWantedLevel();
+        }
+        
+        // --- KEYBOARD EVENTS ---
+        function keyDownHandler(e) {
+            let key = e.key;
+            if (keys.hasOwnProperty(key)) {
+                keys[key] = true;
+                e.preventDefault();
+            }
+            // prevent arrows scrolling
+            if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight') {
+                e.preventDefault();
+            }
+        }
+        
+        function keyUpHandler(e) {
+            let key = e.key;
+            if (keys.hasOwnProperty(key)) keys[key] = false;
+            if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight') e.preventDefault();
+        }
+        
+        window.addEventListener('keydown', keyDownHandler);
+        window.addEventListener('keyup', keyUpHandler);
+        
+        // reset button
+        const resetBtn = document.getElementById('resetButton');
+        resetBtn.addEventListener('click', () => {
+            resetGame();
+        });
+        
+        // initial spawn
+        resetGame();
+        
+        // start game
+        gameLoop();
+    })();
+</script>
+</body>
+</html>

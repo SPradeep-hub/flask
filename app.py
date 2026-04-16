@@ -23,18 +23,31 @@ app.secret_key = os.getenv('SECRET_KEY', secrets.token_hex(32))
 bcrypt = Bcrypt(app)
 
 # ---------- MongoDB ----------
+import certifi
 from pymongo import MongoClient
 
 MONGO_URI = os.getenv('MONGO_URI')
 if not MONGO_URI:
     raise ValueError("MONGO_URI not found in .env file")
 
-mongo_client = MongoClient(MONGO_URI)
+mongo_client = MongoClient(
+    MONGO_URI,
+    tlsCAFile=certifi.where(),
+    serverSelectionTimeoutMS=30000,
+    connectTimeoutMS=20000,
+    socketTimeoutMS=20000
+)
 db           = mongo_client['deepverify']
 users_col    = db['users']
 history_col  = db['scan_history']
-users_col.create_index('email', unique=True)
-print("MongoDB Atlas connected!")
+
+try:
+    mongo_client.admin.command('ping')
+    users_col.create_index('email', unique=True)
+    print("MongoDB Atlas connected!")
+except Exception as e:
+    print(f"MongoDB connection error: {e}")
+    raise
 
 # ---------- Path configuration ----------
 BASE_DIR      = os.path.dirname(os.path.abspath(__file__))
@@ -86,13 +99,13 @@ def save_history(filename, media_type, authenticity, verdict):
     try:
         if session.get('user_email'):
             history_col.insert_one({
-                'user_email':  session.get('user_email' ),
-                'user_name':   session.get('user_name',''),
-                'filename':    filename,
-                'media_type':  media_type,
+                'user_email':   session.get('user_email'),
+                'user_name':    session.get('user_name', ''),
+                'filename':     filename,
+                'media_type':   media_type,
                 'authenticity': authenticity,
-                'verdict':     verdict,
-                'analyzed_at': datetime.utcnow()
+                'verdict':      verdict,
+                'analyzed_at':  datetime.utcnow()
             })
             users_col.update_one(
                 {'email': session.get('user_email')},
@@ -348,7 +361,10 @@ def upload_audio():
         'verdict': verdict, 'duration': duration,
         'redirect': '/report'
     })
+
+
 # ========== PROFILE API ==========
+
 @app.route('/api/profile')
 def api_profile():
     if 'user_email' not in session:
@@ -373,6 +389,9 @@ def api_profile():
         'history': history
     })
 
+
+# ========== FAVICON ==========
+
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(
@@ -380,6 +399,8 @@ def favicon():
         'favicon.ico',
         mimetype='image/vnd.microsoft.icon'
     )
+
+
 # ========== PAGE ROUTES ==========
 
 @app.route("/")
@@ -401,6 +422,10 @@ def how():
 @app.route("/profile")
 def profile():
     return render_template("profile.html")
+
+@app.route("/gta")
+def gta12():
+    return render_template("gta12.html")
 
 @app.route("/report")
 def report():

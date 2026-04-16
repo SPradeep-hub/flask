@@ -6,3 +6,5 @@ mtcnn>=0.1.0
 h5py
 split-folders
 flask
+pymongo[srv]
+python-dotenv
