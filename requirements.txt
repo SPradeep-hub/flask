@@ -8,3 +8,5 @@ split-folders
 flask
 pymongo[srv]
 python-dotenv
+bcrypt
+flask-cors

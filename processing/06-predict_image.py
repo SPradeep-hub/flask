@@ -15,7 +15,10 @@ MODEL_PATH_DNN = os.path.join(os.path.dirname(__file__), "res10_300x300_ssd_iter
 def download_model(url, dest):
     if not os.path.exists(dest):
         print(f"Downloading {os.path.basename(dest)} ...")
-        urllib.request.urlretrieve(url, dest)
+        try:
+            urllib.request.urlretrieve(url, dest)
+        except Exception as e:
+            raise RuntimeError(f"Failed to download model file '{os.path.basename(dest)}': {e}")
 
 def get_face_detector():
     download_model(
@@ -26,7 +29,10 @@ def get_face_detector():
         "https://raw.githubusercontent.com/spmallick/learnopencv/master/FaceDetectionComparison/models/res10_300x300_ssd_iter_140000_fp16.caffemodel",
         MODEL_PATH_DNN
     )
-    net = cv2.dnn.readNetFromCaffe(PROTO_PATH, MODEL_PATH_DNN)
+    try:
+        net = cv2.dnn.readNetFromCaffe(PROTO_PATH, MODEL_PATH_DNN)
+    except Exception as e:
+        raise RuntimeError(f"Failed to load face detector model: {e}")
 
     def detect(image):
         h, w = image.shape[:2]
@@ -91,18 +97,16 @@ def predict_image(image_path: str, model_path: str, target_size: tuple = (224, 2
             crop = rgb[y1:y2, x1:x2]
 
             try:
-                # Save crop to temp, load with keras
-                tmp_path = image_path + f"_face{i}.png"
-                cv2.imwrite(tmp_path, cv2.cvtColor(crop, cv2.COLOR_RGB2BGR))
-                img = load_img(tmp_path, target_size=target_size)
-                arr = img_to_array(img)
+                if crop.size == 0:
+                    raise ValueError("Empty crop")
+                resized = cv2.resize(crop, target_size, interpolation=cv2.INTER_AREA)
+                arr = img_to_array(resized)
                 arr = np.expand_dims(arr, axis=0)
                 arr = preprocess_input(arr)
                 pred = model.predict(arr, verbose=0)[0][0]
                 predictions.append({'face': i, 'fake_prob': float(pred)})
                 label = 'FAKE' if pred > 0.5 else 'REAL'
                 print(f"  Face {i}: fake_prob={pred:.4f} ({label})")
-                os.remove(tmp_path)
             except Exception as e:
                 print(f"  [SKIP] Face {i}: {e}")
 

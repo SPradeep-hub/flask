@@ -19,8 +19,8 @@ def validate_faces_folder(faces_folder: str) -> tuple:
     if not os.path.isdir(faces_folder):
         return False, f"Path exists but is not a folder: '{faces_folder}'"
 
-    all_files    = os.listdir(faces_folder)
-    image_files  = [f for f in all_files if f.lower().endswith(SUPPORTED_EXTENSIONS)]
+    all_files   = os.listdir(faces_folder)
+    image_files = [f for f in all_files if f.lower().endswith(SUPPORTED_EXTENSIONS)]
 
     if not all_files:
         return False, (
@@ -41,7 +41,7 @@ def validate_faces_folder(faces_folder: str) -> tuple:
 
 def predict_faces(faces_folder: str, model_path: str, target_size: tuple = (224, 224)) -> tuple:
     """
-    Predict authenticity for all face images in a folder.
+    Predict authenticity for all face images in a folder using batch prediction.
 
     Args:
         faces_folder: Path to folder containing cropped face images.
@@ -49,7 +49,7 @@ def predict_faces(faces_folder: str, model_path: str, target_size: tuple = (224,
         target_size:  Image resize dimensions expected by the model.
 
     Returns:
-        (authenticity_percentage, num_faces, list_of_predictions)
+        (authenticity_percentage, num_faces, list_of_predictions, per_face_scores)
 
     Raises:
         FileNotFoundError: If model or faces folder is missing.
@@ -72,50 +72,62 @@ def predict_faces(faces_folder: str, model_path: str, target_size: tuple = (224,
     print(f"Loading model from: {model_path}")
     model = load_model(model_path)
 
-    # ── Run predictions ───────────────────────────────────────────────────────
+    # ── Load all images into batch ────────────────────────────────────────────
     image_files = [
         f for f in os.listdir(faces_folder)
         if f.lower().endswith(SUPPORTED_EXTENSIONS)
     ]
     print(f"Found {len(image_files)} face image(s) in '{faces_folder}'")
 
-    predictions  = []
-    failed_files = []
+    batch       = []
+    valid_names = []
+    failed      = []
 
     for fname in image_files:
         img_path = os.path.join(faces_folder, fname)
         try:
             img = load_img(img_path, target_size=target_size)
             arr = img_to_array(img)
-            arr = np.expand_dims(arr, axis=0)
-            arr = preprocess_input(arr)
-            pred = model.predict(arr, verbose=0)[0][0]   # probability of FAKE
-            predictions.append((fname, float(pred)))
-            label = 'FAKE' if pred > 0.5 else 'REAL'
-            print(f"  {fname}: fake_prob={pred:.4f} ({label})")
+            batch.append(arr)
+            valid_names.append(fname)
         except Exception as e:
-            failed_files.append((fname, str(e)))
+            failed.append((fname, str(e)))
             print(f"  [SKIP] {fname}: {e}")
 
-    # ── Warn about failures ───────────────────────────────────────────────────
-    if failed_files:
-        print(f"\n[WARNING] {len(failed_files)} file(s) could not be processed:")
-        for fname, err in failed_files:
+    if failed:
+        print(f"\n[WARNING] {len(failed)} file(s) could not be loaded:")
+        for fname, err in failed:
             print(f"   - {fname}: {err}")
 
-    if not predictions:
+    if not batch:
         raise ValueError(
             f"No faces could be processed from '{faces_folder}'.\n"
-            f"  All {len(image_files)} image(s) failed during prediction.\n"
+            f"  All {len(image_files)} image(s) failed to load.\n"
             f"  Check image integrity or model input requirements."
         )
 
-    # ── Compute result ────────────────────────────────────────────────────────
-    probs         = [p for _, p in predictions]
-    avg_fake_prob = np.mean(probs)
-    authenticity  = (1 - avg_fake_prob) * 100
+    # ── Batch predict (faster than one-by-one) ────────────────────────────────
+    print(f"Running batch prediction on {len(batch)} image(s)...")
+    batch_arr = preprocess_input(np.array(batch))
+    raw_preds = model.predict(batch_arr, verbose=0).flatten()  # probability of FAKE
 
-    return authenticity, len(predictions), predictions
+    # ── Build results ─────────────────────────────────────────────────────────
+    predictions = []
+    per_face    = []
+
+    for fname, pred in zip(valid_names, raw_preds):
+        fake_prob  = float(pred)
+        auth_score = round((1 - fake_prob) * 100, 2)
+        label      = 'FAKE' if fake_prob > 0.5 else 'REAL'
+        predictions.append((fname, fake_prob))
+        per_face.append(auth_score)
+        print(f"  {fname}: fake_prob={fake_prob:.4f} ({label}) | auth={auth_score:.1f}%")
+
+    # ── Compute overall result ────────────────────────────────────────────────
+    avg_fake_prob = float(np.mean(raw_preds))
+    authenticity  = round((1 - avg_fake_prob) * 100, 2)
+
+    return authenticity, len(predictions), predictions, per_face
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
@@ -134,12 +146,13 @@ if __name__ == "__main__":
     )
 
     try:
-        score, count, preds = predict_faces(faces_folder, model_path)
+        score, count, preds, per_face = predict_faces(faces_folder, model_path)
 
         print(f"\n{'-'*40}")
         print(f"  Faces processed : {count}")
         print(f"  Authenticity    : {score:.2f}%")
         print(f"  Verdict         : {'Likely REAL' if score >= 50 else 'Likely FAKE'}")
+        print(f"  Per-face scores : {[f'{s:.1f}%' for s in per_face]}")
         print(f"{'-'*40}")
 
     except FileNotFoundError as e:
