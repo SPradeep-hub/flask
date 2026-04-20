@@ -51,7 +51,7 @@ def predict_audio(audio_path: str, target_sr: int = 16000) -> dict:
 
     # ── Load deepfake detection model from HuggingFace ────────────────────────
     # Model: trained specifically for real vs fake/cloned speech detection
-    MODEL_ID = "MelissaZheng/Deepfake_Audio_Detection"
+    MODEL_ID = "facebook/wav2vec2-base"
 
     print(f"Loading model: {MODEL_ID}")
     print("(First run will download ~400MB — please wait...)")
