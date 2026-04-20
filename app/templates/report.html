@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeepVerify · Forensic Report</title>
-<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0,1" />
@@ -43,6 +43,36 @@
         .verdict-fake    { color: #ff4d4d; }
         .verdict-unknown { color: #f59e0b; }
         .alert-unknown   { background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3); }
+
+        /* Per-face chart styles */
+        @keyframes barGrow { from{width:0%} to{width:var(--target-width)} }
+        .face-bar { animation: barGrow 0.8s cubic-bezier(0.16,1,0.3,1) forwards; width: 0%; }
+        .face-bar-real { background: linear-gradient(90deg, #2aeaff, #a0f2ff); box-shadow: 0 0 10px rgba(42,234,255,0.4); }
+        .face-bar-fake { background: linear-gradient(90deg, #ff4d4d, #ff9999); box-shadow: 0 0 10px rgba(255,77,77,0.4); }
+        .face-row { transition: all 0.2s ease; }
+        .face-row:hover { background: rgba(42,234,255,0.04); border-radius: 10px; padding: 4px 6px; margin: -4px -6px; }
+
+        /* Confidence gauge */
+        .gauge-ring {
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        @keyframes gaugeAnim {
+            from { stroke-dashoffset: 283; }
+        }
+        .gauge-arc {
+            stroke-dasharray: 283;
+            animation: gaugeAnim 1.2s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+
+        /* Theme toggle */
+        body.light { background-color: #f0f4f8; color: #0a0a0f; }
+        body.light .glass-deep { background: rgba(255,255,255,0.75); border-bottom: 1px solid rgba(0,180,200,0.3); }
+        body.light .glass-panel { background: rgba(255,255,255,0.85); border: 1px solid rgba(0,180,200,0.25); }
+        body.light .glass-card { background: rgba(240,248,255,0.9); border: 1px solid rgba(0,180,200,0.2); }
+        body.light .text-white { color: #0a0a0f !important; }
+        body.light .text-white\/70 { color: rgba(10,10,15,0.7) !important; }
+        body.light .text-white\/40 { color: rgba(10,10,15,0.4) !important; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased">
@@ -63,6 +93,10 @@
         <div class="flex items-center gap-3">
             <span class="dot-intelligent"></span>
             <span class="text-xs text-cyan/70 uppercase tracking-wider">online</span>
+            <button id="themeToggleBtn" title="Toggle theme"
+                class="ml-2 w-9 h-9 rounded-full border border-cyan/20 bg-black/20 flex items-center justify-center hover:bg-cyan/10 hover:border-cyan/40 transition-all">
+                <span id="themeToggleIcon" class="material-symbols-outlined text-cyan text-lg">light_mode</span>
+            </button>
         </div>
     </div>
 </nav>
@@ -105,9 +139,28 @@
                     <div class="absolute top-0 right-0 w-60 h-60 bg-cyan/5 rounded-full blur-3xl animate-pulse"></div>
                     <div class="absolute inset-0 data-stream opacity-10"></div>
                     <div class="relative z-10">
-                        <div class="flex items-center gap-3 mb-6">
-                            <span id="verdictIcon" class="material-symbols-outlined text-cyan text-4xl glow-soft">verified</span>
-                            <span class="text-2xl font-medium">Verdict: <span id="verdictText" class="font-bold flicker verdict-real">—</span></span>
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-center gap-3 mb-6">
+                                <span id="verdictIcon" class="material-symbols-outlined text-cyan text-4xl glow-soft">verified</span>
+                                <span class="text-2xl font-medium">Verdict: <span id="verdictText" class="font-bold flicker verdict-real">—</span></span>
+                            </div>
+                            <!-- Confidence Gauge -->
+                            <div class="flex flex-col items-center shrink-0">
+                                <svg width="90" height="90" viewBox="0 0 100 100">
+                                    <!-- Background ring -->
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(42,234,255,0.1)" stroke-width="8"/>
+                                    <!-- Animated arc -->
+                                    <circle id="gaugeArc" cx="50" cy="50" r="45" fill="none"
+                                        stroke="#2aeaff" stroke-width="8"
+                                        stroke-linecap="round"
+                                        class="gauge-ring gauge-arc"
+                                        style="stroke-dashoffset:283"/>
+                                </svg>
+                                <div class="absolute mt-5">
+                                    <span id="gaugeText" class="text-cyan font-bold text-sm font-mono">—%</span>
+                                </div>
+                                <span class="text-white/30 text-[10px] uppercase tracking-wider -mt-2">confidence</span>
+                            </div>
                         </div>
                         <p class="text-white/70 text-lg max-w-2xl">
                             Deepfake probability <span id="deepfakeProb" class="font-semibold flicker">—</span> ·
@@ -117,11 +170,27 @@
                             Analysis completed using neural network v2.4 · <span id="faceCount">—</span>
                         </p>
                         <div class="mt-8 w-full h-3 bg-white/10 rounded-full overflow-hidden">
-                            <div id="confidenceBar" class="h-full shimmer" style="width:0%"></div>
+                            <div id="confidenceBar" class="h-full shimmer transition-all duration-1000" style="width:0%"></div>
                         </div>
                         <div class="flex justify-between text-xs text-white/40 mt-1">
                             <span>0% (Fake)</span><span>100% (Real)</span>
                         </div>
+                    </div>
+                </div>
+
+                <!-- ── PER-FACE CONFIDENCE CHART ── -->
+                <div id="faceChartSection" class="glass-card rounded-3xl p-6 border border-cyan/20 card-hover" style="display:none">
+                    <h3 class="text-lg font-medium mb-2 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-cyan glow-soft">face</span>
+                        Per-face authenticity breakdown
+                    </h3>
+                    <p class="text-white/40 text-xs mb-5">Individual confidence score for each detected face</p>
+                    <div id="faceChartBars" class="space-y-4"></div>
+
+                    <!-- Summary bar -->
+                    <div id="faceChartSummary" class="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-xs text-white/40">
+                        <span id="faceRealCount" class="text-cyan"></span>
+                        <span id="faceFakeCount" class="text-red-400"></span>
                     </div>
                 </div>
 
@@ -263,6 +332,7 @@
     const RAW_VERDICT      = "{{ verdict     | default('') }}";
     const RAW_FILENAME     = "{{ filename    | default('') }}";
     const MEDIA_TYPE       = "{{ media_type  | default('video') }}";
+    const PER_FACE         = {{ per_face     | tojson | default('[]') }};
 
     // ── 2. NO DATA GUARD ──────────────────────────────────────────────────────
     if (RAW_AUTHENTICITY === null || RAW_FACE_COUNT === null) {
@@ -296,7 +366,7 @@
 
     // ── 4. MEDIA TYPE LABELS ──────────────────────────────────────────────────
     if (MEDIA_TYPE === 'audio') {
-        document.getElementById('faceCount').textContent      = 'audio clip analyzed';
+        document.getElementById('faceCount').textContent       = 'audio clip analyzed';
         document.getElementById('faceCountLabel').textContent  = 'Audio samples';
         document.getElementById('faceCountInfo').textContent   = '1 audio clip';
         document.getElementById('mediaTypeDisplay').textContent= 'Audio';
@@ -310,18 +380,17 @@
         document.getElementById('modelName').textContent        = 'EfficientNetB0';
         document.getElementById('metric5Label').textContent     = 'Pixel coherence';
         if (faceCount === 0) {
-            document.getElementById('faceCount').textContent      = 'no face detected (full image scan)';
-            document.getElementById('faceCountInfo').textContent   = 'None (full image fallback)';
-            document.getElementById('faceCountLabel').textContent  = 'Faces detected';
+            document.getElementById('faceCount').textContent     = 'no face detected (full image scan)';
+            document.getElementById('faceCountInfo').textContent  = 'None (full image fallback)';
+            document.getElementById('faceCountLabel').textContent = 'Faces detected';
         } else {
-            document.getElementById('faceCount').textContent      = faceCount + ' face(s) analyzed';
-            document.getElementById('faceCountInfo').textContent   = faceCount + ' face(s)';
-            document.getElementById('faceCountLabel').textContent  = 'Faces detected';
+            document.getElementById('faceCount').textContent     = faceCount + ' face(s) analyzed';
+            document.getElementById('faceCountInfo').textContent  = faceCount + ' face(s)';
+            document.getElementById('faceCountLabel').textContent = 'Faces detected';
         }
     } else {
-        // video (default)
-        document.getElementById('faceCount').textContent       = faceCount + ' face(s) analyzed';
-        document.getElementById('faceCountInfo').textContent   = faceCount + ' face(s)';
+        document.getElementById('faceCount').textContent        = faceCount + ' face(s) analyzed';
+        document.getElementById('faceCountInfo').textContent    = faceCount + ' face(s)';
         document.getElementById('mediaTypeDisplay').textContent = 'Video';
         document.getElementById('modelName').textContent        = 'EfficientNetB0';
     }
@@ -350,8 +419,18 @@
     document.getElementById('confidenceScore').textContent = authenticity + '%';
 
     const bar       = document.getElementById('confidenceBar');
-    bar.style.width = authenticity + '%';
-    bar.className   = 'h-full ' + (isReal ? 'shimmer' : 'shimmer-red');
+    setTimeout(() => { bar.style.width = authenticity + '%'; }, 300);
+    bar.className   = 'h-full transition-all duration-1000 ' + (isReal ? 'shimmer' : 'shimmer-red');
+
+    // ── 6b. CONFIDENCE GAUGE ──────────────────────────────────────────────────
+    const gaugeArc  = document.getElementById('gaugeArc');
+    const gaugeText = document.getElementById('gaugeText');
+    const circumference = 283; // 2 * PI * 45
+    const offset = circumference - (authenticity / 100) * circumference;
+    gaugeArc.style.strokeDashoffset = offset;
+    gaugeArc.style.stroke = isReal ? '#2aeaff' : '#ff4d4d';
+    gaugeText.textContent = authenticity + '%';
+    gaugeText.style.color = isReal ? '#2aeaff' : '#ff4d4d';
 
     // ── 7. METRICS ────────────────────────────────────────────────────────────
     document.getElementById('facialMetric').textContent   = metrics.facial   + '%';
@@ -367,7 +446,56 @@
     document.getElementById('reportIdSpan').textContent    = '#' + reportId;
     document.getElementById('footerReportId').textContent  = 'report ID: ' + reportId.toLowerCase();
 
-    // ── 9. OBSERVATIONS ───────────────────────────────────────────────────────
+    // ── 9. PER-FACE CHART ─────────────────────────────────────────────────────
+    if (PER_FACE && PER_FACE.length > 0) {
+        const section   = document.getElementById('faceChartSection');
+        const container = document.getElementById('faceChartBars');
+        section.style.display = 'block';
+
+        let realCount = 0;
+        let fakeCount = 0;
+
+        PER_FACE.forEach((score, i) => {
+            const faceIsReal = score >= 50;
+            if (faceIsReal) realCount++; else fakeCount++;
+
+            const color     = faceIsReal ? '#2aeaff' : '#ff4d4d';
+            const bgClass   = faceIsReal ? 'face-bar-real' : 'face-bar-fake';
+            const labelText = faceIsReal ? 'REAL' : 'FAKE';
+            const bgTrack   = faceIsReal ? 'rgba(42,234,255,0.08)' : 'rgba(255,77,77,0.08)';
+
+            const row = document.createElement('div');
+            row.className = 'face-row';
+            row.innerHTML = `
+                <div class="flex items-center justify-between mb-1.5">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm" style="color:${color}">face</span>
+                        <span class="text-white/60 text-sm">Face ${i + 1}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="font-mono text-sm font-semibold" style="color:${color}">${score.toFixed(1)}%</span>
+                        <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border font-medium"
+                              style="color:${color};border-color:${color}40;background:${bgTrack}">
+                            ${labelText}
+                        </span>
+                    </div>
+                </div>
+                <div class="w-full rounded-full h-2 overflow-hidden" style="background:rgba(255,255,255,0.06)">
+                    <div class="h-2 rounded-full ${bgClass} face-bar"
+                         style="--target-width:${score}%;animation-delay:${i * 0.12}s">
+                    </div>
+                </div>`;
+            container.appendChild(row);
+        });
+
+        // Summary
+        document.getElementById('faceRealCount').textContent =
+            realCount + ' face' + (realCount !== 1 ? 's' : '') + ' classified as REAL';
+        document.getElementById('faceFakeCount').textContent =
+            fakeCount + ' face' + (fakeCount !== 1 ? 's' : '') + ' classified as FAKE';
+    }
+
+    // ── 10. OBSERVATIONS ──────────────────────────────────────────────────────
     function generateObservations(auth, dp, m) {
         const obs = [];
 
@@ -375,6 +503,12 @@
             obs.push('Note: Analysis performed on audio signal using voice deepfake detection model.');
         } else if (MEDIA_TYPE === 'image' && faceCount === 0) {
             obs.push('Note: No face detected in this image. Prediction ran on full image as fallback — accuracy may be lower than expected.');
+        }
+
+        if (PER_FACE && PER_FACE.length > 1) {
+            const minScore = Math.min(...PER_FACE).toFixed(1);
+            const maxScore = Math.max(...PER_FACE).toFixed(1);
+            obs.push(`Per-face scores ranged from ${minScore}% to ${maxScore}% authenticity across ${PER_FACE.length} detected faces.`);
         }
 
         if (isReal) {
@@ -426,15 +560,16 @@
         obsList.appendChild(li);
     });
 
-    // ── 10. REPORT DATA ───────────────────────────────────────────────────────
+    // ── 11. REPORT DATA ───────────────────────────────────────────────────────
     const reportData = {
         reportId, filename: RAW_FILENAME || 'uploaded_file',
         mediaType: MEDIA_TYPE, verdict: verdictLabel,
         authenticity, deepfakeProbability: deepfakeProb,
-        faceCount, analysisDate: today, metrics, observations
+        faceCount, perFaceScores: PER_FACE,
+        analysisDate: today, metrics, observations
     };
 
-    // ── 11. EXPORTS ───────────────────────────────────────────────────────────
+    // ── 12. EXPORTS ───────────────────────────────────────────────────────────
     function showToast(msg) {
         const e = document.querySelector('.toast-notification');
         if (e) e.remove();
@@ -463,6 +598,13 @@
         c += `Deepfake prob.  : ${reportData.deepfakeProbability}%\n`;
         c += `Samples         : ${reportData.faceCount}\n`;
         c += `Analyzed on     : ${reportData.analysisDate}\n\n`;
+        if (reportData.perFaceScores && reportData.perFaceScores.length > 0) {
+            c += 'PER-FACE SCORES:\n';
+            reportData.perFaceScores.forEach((s, i) =>
+                c += `  Face ${i+1}: ${s.toFixed(1)}% (${s >= 50 ? 'REAL' : 'FAKE'})\n`
+            );
+            c += '\n';
+        }
         c += 'DETAILED INDICATORS:\n';
         c += `  Consistency        : ${reportData.metrics.facial}%\n`;
         c += `  Naturalness        : ${reportData.metrics.lipSync}%\n`;
@@ -486,6 +628,11 @@
         c += `Filename,${reportData.filename}\nMedia Type,${reportData.mediaType}\n`;
         c += `Verdict,${reportData.verdict}\nAuthenticity (%),${reportData.authenticity}\n`;
         c += `Deepfake Probability (%),${reportData.deepfakeProbability}\nSamples,${reportData.faceCount}\n`;
+        if (reportData.perFaceScores && reportData.perFaceScores.length > 0) {
+            reportData.perFaceScores.forEach((s, i) =>
+                c += `Face ${i+1} Authenticity (%),${s.toFixed(1)}\n`
+            );
+        }
         c += `Consistency (%),${reportData.metrics.facial}\nNaturalness (%),${reportData.metrics.lipSync}\n`;
         c += `GAN Artifact (%),${reportData.metrics.gan}\nFFT Analysis (%),${reportData.metrics.fft}\n`;
         c += `Temporal Coherence (%),${reportData.metrics.temporal}\nMetadata Integrity (%),${reportData.metrics.metadata}\n`;
@@ -493,7 +640,7 @@
         downloadFile(c, `DeepVerify_${reportData.reportId}.csv`, 'text/csv');
     }
 
-    // ── 12. BUTTONS ───────────────────────────────────────────────────────────
+    // ── 13. BUTTONS ───────────────────────────────────────────────────────────
     document.getElementById('downloadReportBtn').addEventListener('click', () => { exportTXT(); showToast('Report downloaded'); });
     document.querySelectorAll('.export-txt').forEach(b  => b.addEventListener('click', () => { exportTXT();  showToast('TXT downloaded'); }));
     document.querySelectorAll('.export-json').forEach(b => b.addEventListener('click', () => { exportJSON(); showToast('JSON downloaded'); }));
@@ -508,6 +655,21 @@
             await navigator.clipboard.writeText(text);
             showToast('Copied to clipboard');
         }
+    });
+
+    // ── 14. THEME TOGGLE ─────────────────────────────────────────────────────
+    const STORAGE_KEY = 'deepverify_theme';
+    function applyTheme(theme) {
+        document.body.classList.toggle('light', theme === 'light');
+        document.body.classList.toggle('dark', theme !== 'light');
+        const icon = document.getElementById('themeToggleIcon');
+        if (icon) icon.textContent = theme === 'light' ? 'dark_mode' : 'light_mode';
+    }
+    applyTheme(localStorage.getItem(STORAGE_KEY) || 'dark');
+    document.getElementById('themeToggleBtn').addEventListener('click', () => {
+        const next = (localStorage.getItem(STORAGE_KEY) || 'dark') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(STORAGE_KEY, next);
+        applyTheme(next);
     });
 
 })();

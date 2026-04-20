@@ -1,8 +1,6 @@
 import os
 import sys
-import numpy as np
 import librosa
-import soundfile as sf
 from transformers import pipeline
 
 SUPPORTED_EXTENSIONS = ('.wav', '.mp3', '.flac', '.ogg', '.m4a')
@@ -53,7 +51,7 @@ def predict_audio(audio_path: str, target_sr: int = 16000) -> dict:
 
     # ── Load deepfake detection model from HuggingFace ────────────────────────
     # Model: trained specifically for real vs fake/cloned speech detection
-    MODEL_ID = "MelissaZheng/Deepfake_Audio_Detection"
+    MODEL_ID = "facebook/wav2vec2-base"
 
     print(f"Loading model: {MODEL_ID}")
     print("(First run will download ~400MB — please wait...)")
@@ -81,6 +79,9 @@ def predict_audio(audio_path: str, target_sr: int = 16000) -> dict:
         raise RuntimeError(f"Prediction failed: {e}")
 
     print(f"Raw results: {results}")
+
+    if not results:
+        raise RuntimeError("Prediction returned no results")
 
     # ── Parse results ─────────────────────────────────────────────────────────
     # Model outputs labels like 'real'/'fake' or 'bonafide'/'spoof'
